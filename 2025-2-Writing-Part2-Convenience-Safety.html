@@ -17,7 +17,8 @@
             color: #004d40;
             margin: 0;
             overflow-x: hidden;
-            touch-action: pan-y;
+            /* ページ全体のスクロールを防ぐ設定（ドラッグ優先） */
+            touch-action: none;
         }
         h2 { color: #00695c; margin-top: 15px; margin-bottom: 5px; font-size: 1.6rem; }
         .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
@@ -30,6 +31,8 @@
             box-shadow: 0 8px 25px rgba(0, 77, 64, 0.1);
             text-align: center;
             box-sizing: border-box;
+            /* コンテナ内はスクロールを許可 */
+            touch-action: auto;
         }
         .question-box {
             font-size: 1.2rem;
@@ -53,6 +56,7 @@
             padding: 15px;
             background-color: #fafafa;
             border-radius: 12px;
+            position: relative;
         }
         .word-bank { 
             display: flex; 
@@ -73,6 +77,7 @@
             cursor: pointer;
         }
         .word-btn.used { background-color: #e0e0e0; color: #bdbdbd !important; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
+        
         .answer-word {
             background-color: #ffb300;
             color: #004d40;
@@ -82,12 +87,22 @@
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             user-select: none;
+            /* ドラッグ操作のみに集中させる */
             touch-action: none;
             cursor: move;
+            position: relative;
         }
-        .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
+
+        .dragging {
+            opacity: 0.6;
+            transform: scale(1.1);
+            z-index: 1000;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+
         .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 15px; }
         .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
         
@@ -98,15 +113,14 @@
             .container { padding: 10px; }
             .answer-area { min-height: 90px; gap: 6px; }
         }
-        /* --- 印刷用設定 --- */
-        #printable-sheet { display: none; }
+
+        /* 印刷設定 */
         @media print {
-            body { background: white !important; padding: 0; }
             .no-print { display: none !important; }
-            #printable-sheet { display: block !important; width: 100%; color: black; }
+            #printable-sheet { display: block !important; width: 100%; color: black; background: white; }
             .print-q-block { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
-            .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
         }
+        #printable-sheet { display: none; }
     </style>
 </head>
 <body>
@@ -118,7 +132,7 @@
 
 <div class="container no-print">
     <div id="game-ui">
-        <div id="questionHeader" style="font-weight: bold; margin-bottom: 10px; font-size: 1rem;"></div>
+        <div id="questionHeader" style="font-weight: bold; margin-bottom: 10px;"></div>
         <div class="question-box" id="questionText"></div>
         <div class="result-msg" id="resultMsg"></div>
         <div class="answer-area" id="answerArea"></div>
@@ -133,11 +147,6 @@
 <div class="fab-container no-print">
     <button class="fab" id="ttsBtn" onclick="speakPhrase()" style="display:none;">🔊</button>
     <button class="fab" onclick="window.print()">🖨️</button>
-</div>
-
-<div id="printable-sheet">
-    <h1 style="text-align: center;">英検準1級 作文演習 (Part2)</h1>
-    <div id="print-content"></div>
 </div>
 
 <script>
@@ -156,7 +165,7 @@ const quizData = [
 
 let currentIdx = 0;
 let userSelection = [];
-let dragItem = null;
+let dragIndex = null;
 let isSpeaking = false;
 
 function renderQuestion() {
@@ -168,9 +177,9 @@ function renderQuestion() {
     document.getElementById('questionHeader').textContent = `Question ${currentIdx + 1} / ${quizData.length}`;
     document.getElementById('questionText').textContent = quizData[currentIdx].ja;
 
-    let words = quizData[currentIdx].en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
     const bank = document.getElementById('wordBank');
     bank.innerHTML = "";
+    let words = quizData[currentIdx].en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
     
     shuffle(words).forEach(w => {
         const btn = document.createElement('button');
@@ -188,46 +197,43 @@ function renderQuestion() {
     renderAnswer();
 }
 
-// ★ マウス操作でも「うざくない」最強の入れ替えロジック ★
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / マウスで自由に並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa;">タップで追加 / 掴んで並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
         span.className = "answer-word";
-        if (i === dragItem) span.classList.add('dragging');
+        if (i === dragIndex) span.classList.add('dragging');
         span.textContent = obj.text;
         
-        let moved = false;
-        let startX, startY;
+        let startX, startY, moved;
 
+        // --- Pointerロジック（マウス・タッチ共通） ---
         span.onpointerdown = (e) => {
-            moved = false;
+            span.setPointerCapture(e.pointerId);
+            dragIndex = i;
             startX = e.clientX;
             startY = e.clientY;
-            dragItem = i;
-            span.setPointerCapture(e.pointerId);
-            renderAnswer(); // 掴んだ瞬間に色を変える
+            moved = false;
+            renderAnswer(); 
         };
 
         span.onpointermove = (e) => {
-            if (dragItem !== i) return;
-            
+            if (dragIndex !== i) return;
+
+            // 5px以上動いたらドラッグとみなす
             if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
                 moved = true;
-            }
-
-            if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 const targetEl = target ? target.closest('.answer-word') : null;
                 
                 if (targetEl && targetEl !== span) {
-                    const targetIdx = Array.from(area.children).indexOf(targetEl);
-                    if (targetIdx !== -1) {
-                        const temp = userSelection.splice(dragItem, 1)[0];
-                        userSelection.splice(targetIdx, 0, temp);
-                        dragItem = targetIdx; // 掴んでいるインデックスを更新
+                    const newIndex = Array.from(area.children).indexOf(targetEl);
+                    if (newIndex !== -1) {
+                        const temp = userSelection.splice(dragIndex, 1)[0];
+                        userSelection.splice(newIndex, 0, temp);
+                        dragIndex = newIndex;
                         renderAnswer(); 
                     }
                 }
@@ -235,17 +241,18 @@ function renderAnswer() {
         };
 
         span.onpointerup = (e) => {
-            if (dragItem !== i) return;
+            if (dragIndex !== i) return;
             span.releasePointerCapture(e.pointerId);
-            const wasActuallyDragging = moved;
-            dragItem = null;
+            dragIndex = null;
             
-            if (!wasActuallyDragging) {
+            // 全く動かさずに指を離した＝「削除（戻す）」
+            if (!moved) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
             }
             renderAnswer();
         };
+
         area.appendChild(span);
     });
 }
@@ -272,14 +279,10 @@ function speak(text) {
     const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8;
-    uttr.pitch = 1.2; // Samanthaの少し高めの声
-
+    uttr.pitch = 1.0;
     const voices = synth.getVoices();
-    // Google US English か Samantha を優先
-    const targetVoice = voices.find(v => v.name === 'Google US English') || 
-                        voices.find(v => v.name === 'Samantha') || voices[0];
+    const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
     if (targetVoice) uttr.voice = targetVoice;
-
     uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
     uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
     synth.speak(uttr);
