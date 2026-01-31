@@ -93,7 +93,6 @@
             cursor: move;
         }
 
-        /* ドラッグ中の見た目：よりはっきりと */
         .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
 
         @media screen and (max-width: 600px) {
@@ -112,8 +111,14 @@
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
 
-        @media print { .no-print { display: none !important; } #printable-sheet { display: block !important; } }
+        /* --- 印刷用デザイン --- */
         #printable-sheet { display: none; }
+        @media print {
+            .no-print { display: none !important; }
+            #printable-sheet { display: block !important; width: 100%; color: black; background: white; }
+            .print-q-block { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; page-break-inside: avoid; }
+            .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -145,8 +150,16 @@
     <button class="fab" id="ttsBtn" onclick="speakPhrase()" style="display:none;">🔊</button>
 </div>
 
+<div id="printable-sheet">
+    <h1 style="text-align: center;">英検準1級 英作文トレーニングシート (Part 2)</h1>
+    <div id="print-content"></div>
+    <div style="page-break-before: always; padding-top: 20px;">
+        <h2>解答</h2>
+        <div id="print-answers"></div>
+    </div>
+</div>
+
 <script>
-// ここだけをPart2のセンテンスに入れ替えました
 let quizData = [
     { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
     { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
@@ -211,11 +224,9 @@ function renderAnswer() {
 
         span.onpointermove = (e) => {
             if (dragItem === null) return;
-            
             if (Math.abs(e.movementX) > 1 || Math.abs(e.movementY) > 1) {
                 moved = true;
             }
-
             if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
@@ -234,7 +245,6 @@ function renderAnswer() {
             span.classList.remove('dragging');
             const wasDragging = moved;
             dragItem = null;
-            
             if (!wasDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
@@ -259,6 +269,18 @@ function checkAnswer() {
     }
 }
 
+// ★ 印刷用のデータを作成する関数 ★
+function preparePrint() {
+    const content = document.getElementById('print-content');
+    const answers = document.getElementById('print-answers');
+    content.innerHTML = ""; answers.innerHTML = "";
+    quizData.forEach((q, i) => {
+        let words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
+        content.innerHTML += `<div class="print-q-block"><div style="font-weight:bold;">${i+1}. ${q.ja}</div><div style="font-style:italic;">(${words.join(" / ")})</div><div class="print-line"></div></div>`;
+        answers.innerHTML += `<div>${i+1}. ${q.en}</div>`;
+    });
+}
+
 function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) renderQuestion();
@@ -267,23 +289,24 @@ function nextQuestion() {
 
 function speakPhrase() {
     const uttr = new SpeechSynthesisUtterance(document.getElementById('orderPhrase').innerText);
-    uttr.lang = "en-US";
-    uttr.rate = 0.8;
-    uttr.pitch = 1.1;
+    uttr.lang = "en-US"; uttr.rate = 0.8; uttr.pitch = 1.1;
     const voices = window.speechSynthesis.getVoices();
     uttr.voice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English')) || voices[0];
     window.speechSynthesis.speak(uttr);
 }
 
 function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return array;
+    return arr;
 }
 
 window.speechSynthesis.onvoiceschanged = () => {};
+// 初期化
+preparePrint();
 renderQuestion();
 </script>
 
