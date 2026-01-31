@@ -7,13 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
         body {
-            /* 全体にKosugi Maruを適用 */
             font-family: 'Kosugi Maru', "Hiragino Maru Gothic ProN", sans-serif;
             background-color: #e0f2f1;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            padding-bottom: 100px; /* ③右下ボタンとの干渉を防ぐ余白 */
             color: #004d40;
             margin: 0;
         }
@@ -29,6 +29,7 @@
             border-radius: 20px;
             box-shadow: 0 8px 20px rgba(0, 77, 64, 0.15);
             text-align: center;
+            box-sizing: border-box;
         }
 
         .question-box {
@@ -58,6 +59,7 @@
             padding: 15px;
             background-color: #fafafa;
             border-radius: 10px;
+            transition: background-color 0.2s;
         }
 
         .final-sentence {
@@ -70,17 +72,19 @@
 
         .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
 
+        /* ①選択肢のバブル：色を薄く、文字を濃く */
         .word-btn {
-            background-color: #00897b;
-            color: white;
-            border: none;
+            background-color: #b2dfdb; /* 薄いグリーン */
+            color: #004d40;           /* 濃い文字 */
+            border: 2px solid #80cbc4;
             padding: 10px 16px;
             border-radius: 25px;
             font-size: 0.95rem;
             cursor: pointer;
-            box-shadow: 0 3px 0 #00695c;
+            box-shadow: 0 3px 0 #80cbc4;
+            font-weight: bold;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; box-shadow: none; pointer-events: none; }
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
 
         .answer-word {
             background-color: #ffb300;
@@ -90,8 +94,10 @@
             border-radius: 10px;
             font-size: 1rem;
             font-weight: bold;
-            cursor: grab;
+            cursor: pointer; /* スマホ・PC共通 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            user-select: none;
+            touch-action: manipulation;
         }
 
         .fab-container {
@@ -147,8 +153,8 @@
         <div class="answer-area" id="answerArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; width: 180px;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; width: 180px;">Next Question</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; width: 180px; box-shadow: 0 3px 0 #002d20;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; width: 180px; box-shadow: 0 3px 0 #1b5e20;">Next Question</button>
         </div>
     </div>
 </div>
@@ -235,15 +241,32 @@ function renderAnswer() {
     const area = document.getElementById('answerArea');
     area.innerHTML = "";
     if (userSelection.length === 0 && !isCorrect) {
-        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / ドラッグして順序を入れ替え</span>';
+        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 配置後もドラッグやタップで順序変更可能</span>';
     }
     userSelection.forEach((obj, i) => {
         const btn = document.createElement('button');
         btn.className = "answer-word";
         btn.textContent = obj.text;
         btn.draggable = true;
-        btn.ondragstart = (e) => e.dataTransfer.setData("text/plain", i);
-        btn.onclick = () => removeWord(i);
+        
+        // PC用ドラッグ開始
+        btn.ondragstart = (e) => {
+            e.dataTransfer.setData("text/plain", i);
+            btn.style.opacity = "0.5";
+        };
+        btn.ondragend = () => { btn.style.opacity = "1"; };
+
+        // スマホ用簡易入れ替え：タップで一つ前に移動（連続タップで好きな位置へ）
+        btn.onclick = () => {
+            if (i > 0) {
+                const item = userSelection.splice(i, 1)[0];
+                userSelection.splice(i - 1, 0, item);
+                renderAnswer();
+            } else {
+                // 先頭でタップしたら削除してWord Bankに戻す
+                removeWord(i);
+            }
+        };
         area.appendChild(btn);
     });
 }
@@ -279,34 +302,25 @@ function checkAnswer() {
         document.getElementById('checkBtn').style.display = 'none';
         document.getElementById('nextBtn').style.display = 'block';
     } else {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:#c62828;'>惜しい！広い視点での文構造をもう一度考え直してみましょう。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:#c62828;'>惜しい！広い視点での文構造を意識しましょう。</span>";
     }
 }
 
-// ★若い女性の声を優先的に探す修正版★
 function speak(text) {
     const synth = window.speechSynthesis;
     synth.cancel(); 
-
     const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8; 
     uttr.pitch = 1.1; 
-
     const voices = synth.getVoices();
-    
     const targetVoice = 
         voices.find(v => v.name.includes('Samantha')) ||        
         voices.find(v => v.name.includes('Google US English')) || 
         voices.find(v => v.name.includes('Zira')) ||            
-        voices.find(v => v.name.includes('Female')) ||          
         voices.find(v => v.lang === 'en-US') ||
         voices.find(v => v.lang.startsWith('en'));
-
-    if (targetVoice) {
-        uttr.voice = targetVoice;
-    }
-
+    if (targetVoice) { uttr.voice = targetVoice; }
     synth.speak(uttr);
 }
 
@@ -319,7 +333,7 @@ function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) renderQuestion();
     else {
-        document.getElementById('game-ui').innerHTML = "<h2 style='color:#2e7d32;'>🎉 All Tasks Completed!</h2><p>20の高度な社会視点フレーズを全てマスターしました！</p>";
+        document.getElementById('game-ui').innerHTML = "<h2 style='color:#2e7d32;'>🎉 All Tasks Completed!</h2><p>高度な社会視点フレーズを全てマスターしました！</p>";
     }
 }
 
