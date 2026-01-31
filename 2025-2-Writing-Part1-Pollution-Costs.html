@@ -52,48 +52,30 @@
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+            justify-content: center; gap: 10px;
             padding: 15px;
             background-color: #fafafa;
             border-radius: 12px;
         }
 
         .word-bank { 
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            gap: 12px; 
-            margin-bottom: 20px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 20px;
         }
 
         .word-btn {
-            background-color: #b2dfdb; 
-            color: #004d40;           
-            border: 2px solid #80cbc4;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #80cbc4;
-            cursor: pointer;
+            background-color: #b2dfdb; color: #004d40; border: 2px solid #80cbc4;
+            padding: 12px 20px; border-radius: 30px; font-size: 1.1rem;
+            font-weight: bold; box-shadow: 0 4px 0 #80cbc4; cursor: pointer;
         }
         .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; }
 
         .answer-word {
-            background-color: #ffb300;
-            color: #004d40;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            user-select: none;
-            touch-action: none;
-            cursor: move;
+            background-color: #ffb300; color: #004d40; padding: 12px 20px;
+            border-radius: 10px; font-size: 1.1rem; font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15); user-select: none;
+            touch-action: none; cursor: move;
         }
 
-        /* ドラッグ中の見た目：よりはっきりと */
         .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
 
         @media screen and (max-width: 600px) {
@@ -112,8 +94,15 @@
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
 
-        @media print { .no-print { display: none !important; } #printable-sheet { display: block !important; } }
+        /* 印刷設定 */
         #printable-sheet { display: none; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0; }
+            #printable-sheet { display: block !important; width: 100%; color: black; background: white; }
+            .print-q-block { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; page-break-inside: avoid; }
+            .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -131,13 +120,22 @@
         <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px; box-shadow: 0 4px 0 #002d20;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px; box-shadow: 0 4px 0 #1b5e20;">Next Question</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px;">Next Question</button>
         </div>
         
         <div class="footer-tools no-print">
-            <button class="word-btn" onclick="window.print()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px; box-shadow: 0 3px 0 #455a64;">🖨️ 印刷用ページを表示</button>
+            <button class="word-btn" onclick="generateAndPrint()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px;">🖨️ 印刷用ページを表示</button>
         </div>
+    </div>
+</div>
+
+<div id="printable-sheet">
+    <h1 style="text-align: center;">英検準1級 英作文演習 (Part 1)</h1>
+    <div id="print-content"></div>
+    <div style="page-break-before: always;">
+        <h2>解答集</h2>
+        <div id="print-answers"></div>
     </div>
 </div>
 
@@ -203,19 +201,14 @@ function renderAnswer() {
         let moved = false;
         span.onpointerdown = (e) => {
             moved = false;
-            dragItem = i; // ここで初めて「入れ替え準備OK」のフラグを立てる
+            dragItem = i;
             span.classList.add('dragging');
             span.setPointerCapture(e.pointerId);
         };
 
         span.onpointermove = (e) => {
-            if (dragItem === null) return; // ボタンが押されていないホバー状態なら何もしない
-            
-            // 意図的なドラッグかどうか判定（微細な動きはタップとみなす）
-            if (Math.abs(e.movementX) > 1 || Math.abs(e.movementY) > 1) {
-                moved = true;
-            }
-
+            if (dragItem === null) return;
+            if (Math.abs(e.movementX) > 1 || Math.abs(e.movementY) > 1) moved = true;
             if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
@@ -234,8 +227,6 @@ function renderAnswer() {
             span.classList.remove('dragging');
             const wasDragging = moved;
             dragItem = null;
-            
-            // 動かさずに指/マウスを離した場合は「戻す（削除）」を実行
             if (!wasDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
@@ -258,6 +249,26 @@ function checkAnswer() {
     } else {
         document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again!</span>";
     }
+}
+
+// ★ここが不足していた「印刷用の中身を作る」関数です★
+function generateAndPrint() {
+    const content = document.getElementById('print-content');
+    const answers = document.getElementById('print-answers');
+    content.innerHTML = "";
+    answers.innerHTML = "";
+
+    quizData.forEach((q, i) => {
+        let words = shuffle([...q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0)]);
+        content.innerHTML += `
+            <div class="print-q-block">
+                <div style="font-weight:bold;">${i+1}. ${q.ja}</div>
+                <div style="font-style:italic; font-size:0.9rem; margin-top:5px; color:#444;">(${words.join(" / ")})</div>
+                <div class="print-line"></div>
+            </div>`;
+        answers.innerHTML += `<div>${i+1}. ${q.en}</div>`;
+    });
+    window.print();
 }
 
 function nextQuestion() {
