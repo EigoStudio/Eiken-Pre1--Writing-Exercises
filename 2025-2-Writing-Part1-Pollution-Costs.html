@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025-2 英検準1級 作文 並べ替え問題 Part1 Pollution & Costs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>2025-2 英検準1級 作文 並べ替え問題 Part1</title>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
         body {
@@ -13,9 +13,11 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            padding-bottom: 100px; /* 右下ボタンとの干渉を防ぐ余白 */
+            padding-bottom: 100px;
             color: #004d40;
             margin: 0;
+            /* ドラッグ中に画面がスクロールしてしまわないように制限（必要な場合のみ） */
+            touch-action: pan-y;
         }
 
         h2 { color: #00695c; margin-bottom: 5px; }
@@ -59,19 +61,11 @@
             padding: 15px;
             background-color: #fafafa;
             border-radius: 10px;
-        }
-
-        .final-sentence {
-            font-size: 1.3rem;
-            color: #004d40;
-            font-weight: bold;
-            padding: 20px;
-            line-height: 1.6;
+            position: relative;
         }
 
         .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
 
-        /* 選択肢のバブル：色を薄く、文字を濃く */
         .word-btn {
             background-color: #b2dfdb; 
             color: #004d40;           
@@ -93,10 +87,17 @@
             border-radius: 10px;
             font-size: 1rem;
             font-weight: bold;
-            cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             user-select: none;
-            touch-action: manipulation;
+            /* 指での操作をスムーズにする設定 */
+            touch-action: none; 
+            cursor: move;
+        }
+
+        /* ドラッグ中のスタイル */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
         }
 
         .fab-container {
@@ -124,15 +125,11 @@
 
         .result-msg { font-weight: bold; font-size: 1.2rem; min-height: 35px; margin-bottom: 10px; }
 
+        .final-sentence { font-size: 1.3rem; color: #004d40; font-weight: bold; padding: 20px; line-height: 1.6; }
+
         @media print {
-            body { background: white; padding: 0; color: black; }
             .no-print { display: none !important; }
-            #printable-sheet { display: block !important; width: 100%; }
-            .print-q-block { margin-bottom: 20px; page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-            .print-ja { font-weight: bold; font-size: 11pt; margin-bottom: 5px; }
-            .print-words { font-style: italic; font-size: 10pt; color: #444; margin-bottom: 10px; }
-            .print-line { border-bottom: 1px solid black; height: 30px; width: 95%; margin-top: 10px; }
-            .answer-key { page-break-before: always; }
+            #printable-sheet { display: block !important; }
         }
         #printable-sheet { display: none; }
     </style>
@@ -140,7 +137,7 @@
 <body>
 
 <div class="no-print" style="text-align: center;">
-    <h2>2025-2 英検準1級 作文 並べ替え問題 Part1 Pollution & Costs</h2>
+    <h2>2025-2 英検準1級 作文 並べ替え問題 Part1</h2>
     <div class="sub-title">Topic: Public Transportation Requirement<br><b>Focus: Pollution & Costs</b></div>
 </div>
 
@@ -149,7 +146,7 @@
         <div id="questionHeader" style="font-weight: bold; margin-bottom: 10px; color: #00796b;"></div>
         <div class="question-box" id="questionText"></div>
         <div class="result-msg" id="resultMsg"></div>
-        <div class="answer-area" id="answerArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
             <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; width: 180px; box-shadow: 0 3px 0 #002d20;">Check Answer</button>
@@ -161,15 +158,6 @@
 <div class="fab-container no-print">
     <button class="fab" id="ttsBtn" onclick="speakPhrase()" title="読み上げ" style="display:none;">🔊</button>
     <button class="fab" onclick="window.print()" title="印刷">🖨️</button>
-</div>
-
-<div id="printable-sheet">
-    <h1 style="text-align: center; border-bottom: 2px solid black;">2025-2 英検準1級 作文 並べ替え問題 Part1 Pollution & Costs</h1>
-    <div id="print-content"></div>
-    <div class="answer-key">
-        <h3>【解答 (Sample Answers)】</h3>
-        <div id="print-answers"></div>
-    </div>
 </div>
 
 <script>
@@ -193,7 +181,6 @@ let isCorrect = false;
 
 function init() {
     renderQuestion();
-    preparePrint();
 }
 
 function shuffle(array) {
@@ -240,44 +227,61 @@ function renderAnswer() {
     const area = document.getElementById('answerArea');
     area.innerHTML = "";
     if (userSelection.length === 0 && !isCorrect) {
-        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 配置後もドラッグやタップで順序変更可能</span>';
+        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 指で引っぱって並べ替え</span>';
     }
+
     userSelection.forEach((obj, i) => {
         const btn = document.createElement('button');
         btn.className = "answer-word";
         btn.textContent = obj.text;
-        btn.draggable = true;
         
+        // --- スマホ＆PC対応ドラッグロジック ---
+        
+        // PC用（Mouse Events）
+        btn.draggable = true;
         btn.ondragstart = (e) => {
             e.dataTransfer.setData("text/plain", i);
-            btn.style.opacity = "0.5";
+            btn.classList.add('dragging');
         };
-        btn.ondragend = () => { btn.style.opacity = "1"; };
+        btn.ondragend = () => btn.classList.remove('dragging');
+        
+        // PC用（Drop）
+        btn.ondragover = (e) => e.preventDefault();
+        btn.ondrop = (e) => {
+            e.preventDefault();
+            const fromIdx = e.dataTransfer.getData("text/plain");
+            moveItem(parseInt(fromIdx), i);
+        };
 
-        btn.onclick = () => {
-            if (i > 0) {
-                const item = userSelection.splice(i, 1)[0];
-                userSelection.splice(i - 1, 0, item);
-                renderAnswer();
-            } else {
+        // スマホ用（Touch Events）
+        btn.ontouchstart = (e) => {
+            btn.classList.add('dragging');
+            btn.dataset.index = i;
+        };
+
+        btn.ontouchend = (e) => {
+            btn.classList.remove('dragging');
+            const touch = e.changedTouches[0];
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (targetEl && targetEl.classList.contains('answer-word')) {
+                // 他の単語の上にドロップされた場合
+                const targetIdx = Array.from(area.children).indexOf(targetEl);
+                moveItem(i, targetIdx);
+            } else if (!targetEl || !targetEl.closest('.answer-area')) {
+                // エリア外に放り出されたら削除
                 removeWord(i);
             }
         };
+
         area.appendChild(btn);
     });
 }
 
-function allowDrop(e) { e.preventDefault(); }
-function drop(e) {
-    e.preventDefault();
-    const fromIdx = e.dataTransfer.getData("text/plain");
-    const target = e.target;
-    if (target.className === "answer-word") {
-        const toIdx = Array.from(target.parentNode.children).indexOf(target);
-        const item = userSelection.splice(fromIdx, 1)[0];
-        userSelection.splice(toIdx, 0, item);
-        renderAnswer();
-    }
+function moveItem(from, to) {
+    const item = userSelection.splice(from, 1)[0];
+    userSelection.splice(to, 0, item);
+    renderAnswer();
 }
 
 function removeWord(i) {
@@ -291,17 +295,18 @@ function checkAnswer() {
     const q = quizData[currentIdx];
     if (userStr === q.en) {
         isCorrect = true;
-        document.getElementById('resultMsg').innerHTML = "<span style='color:#2e7d32;'>Excellent! 社会的な視点での記述が完璧です。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:#2e7d32;'>Excellent! 正解です！</span>";
         document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
         document.getElementById('wordBank').innerHTML = "";
         document.getElementById('ttsBtn').style.display = 'flex';
         document.getElementById('checkBtn').style.display = 'none';
         document.getElementById('nextBtn').style.display = 'block';
     } else {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:#c62828;'>惜しい！広い視点での文構造を意識しましょう。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:#c62828;'>惜しい！もう一度並べ替えてみよう。</span>";
     }
 }
 
+// 音声読み上げ（Samantha/Google優先）
 function speak(text) {
     const synth = window.speechSynthesis;
     synth.cancel(); 
@@ -310,39 +315,23 @@ function speak(text) {
     uttr.rate = 0.8; 
     uttr.pitch = 1.1; 
     const voices = synth.getVoices();
-    const targetVoice = 
-        voices.find(v => v.name.includes('Samantha')) ||        
-        voices.find(v => v.name.includes('Google US English')) || 
-        voices.find(v => v.name.includes('Zira')) ||            
-        voices.find(v => v.lang === 'en-US') ||
-        voices.find(v => v.lang.startsWith('en'));
-    if (targetVoice) { uttr.voice = targetVoice; }
+    const targetVoice = voices.find(v => v.name.includes('Samantha')) || 
+                        voices.find(v => v.name.includes('Google US English')) || 
+                        voices.find(v => v.lang === 'en-US');
+    if (targetVoice) uttr.voice = targetVoice;
     synth.speak(uttr);
 }
 
 function speakPhrase() {
-    const phrase = document.getElementById('orderPhrase').innerText;
-    speak(phrase);
+    speak(document.getElementById('orderPhrase').innerText);
 }
 
 function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) renderQuestion();
-    else {
-        document.getElementById('game-ui').innerHTML = "<h2 style='color:#2e7d32;'>🎉 Part 1 クリア！</h2><p>Pollution と Costs の視点をマスターしましたね。</p>";
-    }
+    else document.getElementById('game-ui').innerHTML = "<h2>🎉 Part 1 クリア！</h2>";
 }
 
-function preparePrint() {
-    const container = document.getElementById('print-content');
-    const keyContainer = document.getElementById('print-answers');
-    container.innerHTML = ""; keyContainer.innerHTML = "";
-    quizDataOriginal.forEach((q, i) => {
-        let words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
-        container.innerHTML += `<div class="print-q-block"><div class="print-ja">${i+1}. ${q.ja}</div><div class="print-words">(${words.join(" / ")})</div><div class="print-line"></div></div>`;
-        keyContainer.innerHTML += `<div>${i+1}. ${q.en}</div>`;
-    });
-}
 window.speechSynthesis.onvoiceschanged = () => {};
 init();
 </script>
