@@ -19,10 +19,8 @@
             overflow-x: hidden;
             touch-action: pan-y;
         }
-
         h2 { color: #00695c; margin-top: 15px; margin-bottom: 5px; font-size: 1.6rem; }
         .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
-
         .container {
             background: white;
             width: 100%;
@@ -33,7 +31,6 @@
             text-align: center;
             box-sizing: border-box;
         }
-
         .question-box {
             font-size: 1.2rem;
             font-weight: bold;
@@ -45,7 +42,6 @@
             text-align: left;
             line-height: 1.6;
         }
-
         .answer-area {
             min-height: 110px;
             border: 3px dashed #80cbc4;
@@ -58,7 +54,6 @@
             background-color: #fafafa;
             border-radius: 12px;
         }
-
         .word-bank { 
             display: flex; 
             flex-wrap: wrap; 
@@ -66,7 +61,6 @@
             gap: 12px; 
             margin-bottom: 20px;
         }
-
         .word-btn {
             background-color: #b2dfdb; 
             color: #004d40;           
@@ -78,8 +72,7 @@
             box-shadow: 0 4px 0 #80cbc4;
             cursor: pointer;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
-
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd !important; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
         .answer-word {
             background-color: #ffb300;
             color: #004d40;
@@ -92,9 +85,11 @@
             touch-action: none;
             cursor: move;
         }
-
         .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
-
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
+        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
         @media screen and (max-width: 600px) {
             h2 { font-size: 1.3rem; }
             .question-box { font-size: 1rem; padding: 12px; }
@@ -102,17 +97,6 @@
             .container { padding: 10px; }
             .answer-area { min-height: 90px; gap: 6px; }
         }
-
-        .footer-tools { margin-top: 30px; display: flex; justify-content: center; }
-
-        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
-        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; }
-
-        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
-        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
-
-        @media print { .no-print { display: none !important; } #printable-sheet { display: block !important; } }
-        #printable-sheet { display: none; }
     </style>
 </head>
 <body>
@@ -130,12 +114,8 @@
         <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px; box-shadow: 0 4px 0 #002d20;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px; box-shadow: 0 4px 0 #1b5e20;">Next Question</button>
-        </div>
-        
-        <div class="footer-tools no-print">
-            <button class="word-btn" onclick="window.print()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px; box-shadow: 0 3px 0 #455a64;">🖨️ 印刷用ページを表示</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white;">Next Question</button>
         </div>
     </div>
 </div>
@@ -145,7 +125,8 @@
 </div>
 
 <script>
-let quizData = [
+// --- データをここに集約 ---
+const quizData = [
     { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
     { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
     { ja: "[Convenience] 自家用車の台数を減らすことで、歩行者に優しい公園や公共広場のためのスペースが増える。", en: "Reducing the number of private vehicles creates more space for pedestrian-friendly parks and public plazas." },
@@ -163,6 +144,7 @@ let userSelection = [];
 let dragItem = null;
 let isSpeaking = false;
 
+// --- 初期描画 ---
 function renderQuestion() {
     userSelection = [];
     document.getElementById('resultMsg').textContent = "";
@@ -175,6 +157,7 @@ function renderQuestion() {
     let words = quizData[currentIdx].en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
     const bank = document.getElementById('wordBank');
     bank.innerHTML = "";
+    
     shuffle(words).forEach(w => {
         const btn = document.createElement('button');
         btn.className = "word-btn";
@@ -193,7 +176,7 @@ function renderQuestion() {
 
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 配置後もタップで戻す・長押しで並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 戻す・長押しで並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
@@ -213,13 +196,10 @@ function renderAnswer() {
         };
 
         span.onpointermove = (e) => {
-            if (dragItem === null) return; 
-           // 遊び（しきい値）を10pxに設定。これにより「弾かれる」誤作動を防ぎます
-            if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) {
-                hasMovedSignificantDistance = true;
-            }
+            if (dragItem === null) return;
+            if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) moved = true;
 
-            if (hasMovedSignificantDistance) {
+            if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
                     const targetIdx = Array.from(area.children).indexOf(target);
@@ -227,7 +207,7 @@ function renderAnswer() {
                         const temp = userSelection.splice(dragItem, 1)[0];
                         userSelection.splice(targetIdx, 0, temp);
                         dragItem = targetIdx;
-                        renderAnswer(); // 瞬時に入れ替えを描画
+                        renderAnswer();
                     }
                 }
             }
@@ -235,20 +215,22 @@ function renderAnswer() {
 
         span.onpointerup = (e) => {
             span.classList.remove('dragging');
-            const wasDragging = moved;
+            const wasActuallyDragging = moved;
             dragItem = null;
-            // 「しっかり動かした」わけではない（＝単純なタップ）と判断された時だけ、下に戻す
             if (!wasActuallyDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
                 renderAnswer();
+            }
+        };
+        area.appendChild(span);
     });
 }
 
 function checkAnswer() {
     const userStr = userSelection.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
     if (userStr === quizData[currentIdx].en) {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent! 正解です。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent!</span>";
         document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
         document.getElementById('wordBank').innerHTML = "";
         document.getElementById('checkBtn').style.display = "none";
@@ -273,11 +255,7 @@ function speak(text) {
     uttr.pitch = 1.0;
 
     const voices = synth.getVoices();
-    const targetVoice = voices.find(v => v.name === 'Google US English') || 
-                        voices.find(v => v.name === 'Samantha') || 
-                        voices.find(v => v.lang === 'en-US') ||
-                        voices.find(v => v.lang.startsWith('en'));
-
+    const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
     if (targetVoice) uttr.voice = targetVoice;
 
     uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
