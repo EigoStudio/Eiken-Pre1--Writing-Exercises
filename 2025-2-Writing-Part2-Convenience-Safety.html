@@ -78,7 +78,7 @@
             box-shadow: 0 4px 0 #80cbc4;
             cursor: pointer;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd !important; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; }
 
         .answer-word {
             background-color: #ffb300;
@@ -93,13 +93,7 @@
             cursor: move;
         }
 
-        .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; pointer-events: none; }
-
-        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 15px; }
-        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
-        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+        .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
 
         @media screen and (max-width: 600px) {
             h2 { font-size: 1.3rem; }
@@ -109,13 +103,20 @@
             .answer-area { min-height: 90px; gap: 6px; }
         }
 
-        /* --- 印刷用設定（Part1準拠 + タイトル小） --- */
+        .footer-tools { margin-top: 30px; display: flex; justify-content: center; }
+
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; }
+
+        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
+        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+
+        /* 印刷設定 */
         #printable-sheet { display: none; }
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; padding: 0; font-family: 'Kosugi Maru', sans-serif; }
             #printable-sheet { display: block !important; width: 100%; color: black; background: white; }
-            /* タイトルのフォントサイズを小さめに設定 */
             .print-header h1 { font-size: 16pt; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 20px; }
             .print-q-block { margin-bottom: 25px; border-bottom: 1px solid #ccc; padding-bottom: 10px; page-break-inside: avoid; }
             .print-ja { font-weight: bold; font-size: 11pt; margin-bottom: 5px; }
@@ -140,12 +141,12 @@
         <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px;">Next Question</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px; box-shadow: 0 4px 0 #002d20;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px; box-shadow: 0 4px 0 #1b5e20;">Next Question</button>
         </div>
         
-        <div class="footer-tools no-print" style="margin-top: 30px;">
-            <button class="word-btn" onclick="window.print()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px;">🖨️ 印刷用ページを表示</button>
+        <div class="footer-tools no-print">
+            <button class="word-btn" onclick="window.print()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px; box-shadow: 0 3px 0 #455a64;">🖨️ 印刷用ページを表示</button>
         </div>
     </div>
 </div>
@@ -166,7 +167,7 @@
 </div>
 
 <script>
-const quizData = [
+let quizData = [
     { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
     { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
     { ja: "[Convenience] 自家用車の台数を減らすことで、歩行者に優しい公園や公共広場のためのスペースが増える。", en: "Reducing the number of private vehicles creates more space for pedestrian-friendly parks and public plazas." },
@@ -182,7 +183,6 @@ const quizData = [
 let currentIdx = 0;
 let userSelection = [];
 let dragItem = null;
-let isSpeaking = false;
 
 function preparePrint() {
     const content = document.getElementById('print-content');
@@ -225,34 +225,31 @@ function renderQuestion() {
 
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 長押しスライドで並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 配置後もタップで戻す・長押しスライドで並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
         span.className = "answer-word";
-        if (i === dragItem) span.classList.add('dragging');
         span.textContent = obj.text;
         
         let moved = false;
-        let startX, startY;
-
         span.onpointerdown = (e) => {
             moved = false;
-            startX = e.clientX;
-            startY = e.clientY;
-            dragItem = i; 
+            dragItem = i;
+            span.classList.add('dragging');
             span.setPointerCapture(e.pointerId);
-            renderAnswer(); 
         };
 
         span.onpointermove = (e) => {
-            if (dragItem === null || dragItem !== i) return; 
-            if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+            if (dragItem === null) return;
+            if (Math.abs(e.movementX) > 1 || Math.abs(e.movementY) > 1) {
                 moved = true;
+            }
+            if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
                     const targetIdx = Array.from(area.children).indexOf(target);
-                    if (targetIdx !== dragItem && targetIdx !== -1) {
+                    if (targetIdx !== dragItem) {
                         const temp = userSelection.splice(dragItem, 1)[0];
                         userSelection.splice(targetIdx, 0, temp);
                         dragItem = targetIdx;
@@ -263,15 +260,14 @@ function renderAnswer() {
         };
 
         span.onpointerup = (e) => {
-            if (dragItem === null || dragItem !== i) return;
-            span.releasePointerCapture(e.pointerId);
-            const wasActuallyDragging = moved;
+            span.classList.remove('dragging');
+            const wasDragging = moved;
             dragItem = null;
-            if (!wasActuallyDragging) {
+            if (!wasDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
+                renderAnswer();
             }
-            renderAnswer();
         };
         area.appendChild(span);
     });
@@ -280,32 +276,23 @@ function renderAnswer() {
 function checkAnswer() {
     const userStr = userSelection.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
     if (userStr === quizData[currentIdx].en) {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:green; font-weight:bold;'>Excellent! 正解です。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent!</span>";
         document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
         document.getElementById('wordBank').innerHTML = "";
         document.getElementById('checkBtn').style.display = "none";
         document.getElementById('nextBtn').style.display = "block";
         document.getElementById('ttsBtn').style.display = "flex";
-        document.getElementById('ttsBtn').textContent = "🔊";
     } else {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again! 語順を確認してください。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again!</span>";
     }
 }
 
 function speakPhrase() {
-    const synth = window.speechSynthesis;
-    if (synth.speaking && isSpeaking) { synth.cancel(); return; }
-    synth.cancel();
     const uttr = new SpeechSynthesisUtterance(document.getElementById('orderPhrase').innerText);
-    uttr.lang = "en-US";
-    uttr.rate = 0.8;
-    uttr.pitch = 1.0; 
-    const voices = synth.getVoices();
-    const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
-    if (targetVoice) uttr.voice = targetVoice;
-    uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
-    uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
-    synth.speak(uttr);
+    uttr.lang = "en-US"; uttr.rate = 0.8; uttr.pitch = 1.1;
+    const voices = window.speechSynthesis.getVoices();
+    uttr.voice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English')) || voices[0];
+    window.speechSynthesis.speak(uttr);
 }
 
 function nextQuestion() {
@@ -315,17 +302,17 @@ function nextQuestion() {
 }
 
 function shuffle(array) {
-    const n = [...array];
-    for (let i = n.length - 1; i > 0; i--) {
+    for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [n[i], n[j]] = [n[j], n[i]];
+        [array[i], array[j]] = [array[j], array[i]];
     }
-    return n;
+    return array;
 }
 
 window.speechSynthesis.onvoiceschanged = () => {};
 preparePrint();
 renderQuestion();
 </script>
+
 </body>
 </html>
