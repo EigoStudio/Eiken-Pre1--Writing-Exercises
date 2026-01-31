@@ -78,7 +78,7 @@
             box-shadow: 0 4px 0 #80cbc4;
             cursor: pointer;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; }
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
 
         .answer-word {
             background-color: #ffb300;
@@ -145,7 +145,6 @@
 </div>
 
 <script>
-// --- Part2のデータ ---
 let quizData = [
     { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
     { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
@@ -162,8 +161,6 @@ let quizData = [
 let currentIdx = 0;
 let userSelection = [];
 let dragItem = null;
-
-    // ★再生・停止の管理用変数★
 let isSpeaking = false;
 
 function renderQuestion() {
@@ -196,7 +193,7 @@ function renderQuestion() {
 
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 配置後もタップで戻す・長押しスライドで並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 配置後もタップで戻す・長押しで並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
@@ -217,8 +214,6 @@ function renderAnswer() {
 
         span.onpointermove = (e) => {
             if (dragItem === null) return; 
-            
-            // 3ピクセル以上の動きがあればドラッグとみなす（ホバリング防止）
             if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) {
                 moved = true;
             }
@@ -241,7 +236,6 @@ function renderAnswer() {
             span.classList.remove('dragging');
             const wasDragging = moved;
             dragItem = null;
-            
             if (!wasDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
@@ -261,43 +255,23 @@ function checkAnswer() {
         document.getElementById('checkBtn').style.display = "none";
         document.getElementById('nextBtn').style.display = "block";
         document.getElementById('ttsBtn').style.display = "flex";
+        document.getElementById('ttsBtn').textContent = "🔊";
     } else {
         document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again!</span>";
     }
 }
 
-function nextQuestion() {
-    currentIdx++;
-    if (currentIdx < quizData.length) renderQuestion();
-    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
-}
-
-let currentIdx = 0;
-let userSelection = [];
-let dragItem = null;
-
-// ★再生・停止の管理用変数★
-let isSpeaking = false;
-
-// --- (中略: renderQuestion, renderAnswer, checkAnswer などのロジック) ---
-
-// ★ 修正版：再生・停止をコントロールする関数 ★
 function speak(text) {
     const synth = window.speechSynthesis;
-
-    // もし現在再生中なら、停止して終了
     if (synth.speaking && isSpeaking) {
         synth.cancel();
-        setTtsIcon(false);
         return;
     }
-
-    synth.cancel(); // 念のため前の音声をクリア
-
+    synth.cancel();
     const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8;
-    uttr.pitch = 1.0; // ご提示のコードに合わせて1.0（標準）に設定
+    uttr.pitch = 1.0;
 
     const voices = synth.getVoices();
     const targetVoice = voices.find(v => v.name === 'Google US English') || 
@@ -305,44 +279,23 @@ function speak(text) {
                         voices.find(v => v.lang === 'en-US') ||
                         voices.find(v => v.lang.startsWith('en'));
 
-    if (targetVoice) {
-        uttr.voice = targetVoice;
-    }
+    if (targetVoice) uttr.voice = targetVoice;
 
-    // 再生開始時の処理
-    uttr.onstart = () => {
-        isSpeaking = true;
-        setTtsIcon(true);
-    };
-
-    // 再生終了時の処理
-    uttr.onend = () => {
-        isSpeaking = false;
-        setTtsIcon(false);
-    };
-
-    // 再生エラー時（中断など）の処理
-    uttr.onerror = () => {
-        isSpeaking = false;
-        setTtsIcon(false);
-    };
-
+    uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
+    uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
+    uttr.onerror = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
     synth.speak(uttr);
-}
-
-// アイコンを切り替える補助関数
-function setTtsIcon(playing) {
-    const btn = document.getElementById('ttsBtn');
-    if (btn) {
-        btn.textContent = playing ? "⏹️" : "🔊";
-    }
 }
 
 function speakPhrase() {
     const phraseEl = document.getElementById('orderPhrase');
-    if (phraseEl) {
-        speak(phraseEl.innerText);
-    }
+    if (phraseEl) speak(phraseEl.innerText);
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) renderQuestion();
+    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
 }
 
 function shuffle(array) {
@@ -356,6 +309,5 @@ function shuffle(array) {
 window.speechSynthesis.onvoiceschanged = () => {};
 renderQuestion();
 </script>
-
 </body>
 </html>
