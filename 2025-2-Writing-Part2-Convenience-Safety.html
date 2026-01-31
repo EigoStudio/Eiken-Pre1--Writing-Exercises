@@ -214,11 +214,12 @@ function renderAnswer() {
 
         span.onpointermove = (e) => {
             if (dragItem === null) return; 
-            if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) {
-                moved = true;
+           // 遊び（しきい値）を10pxに設定。これにより「弾かれる」誤作動を防ぎます
+            if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) {
+                hasMovedSignificantDistance = true;
             }
 
-            if (moved) {
+            if (hasMovedSignificantDistance) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
                     const targetIdx = Array.from(area.children).indexOf(target);
@@ -226,7 +227,7 @@ function renderAnswer() {
                         const temp = userSelection.splice(dragItem, 1)[0];
                         userSelection.splice(targetIdx, 0, temp);
                         dragItem = targetIdx;
-                        renderAnswer();
+                        renderAnswer(); // 瞬時に入れ替えを描画
                     }
                 }
             }
@@ -236,13 +237,11 @@ function renderAnswer() {
             span.classList.remove('dragging');
             const wasDragging = moved;
             dragItem = null;
-            if (!wasDragging) {
+            // 「しっかり動かした」わけではない（＝単純なタップ）と判断された時だけ、下に戻す
+            if (!wasActuallyDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
                 renderAnswer();
-            }
-        };
-        area.appendChild(span);
     });
 }
 
