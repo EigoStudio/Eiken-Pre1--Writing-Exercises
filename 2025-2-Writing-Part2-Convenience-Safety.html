@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2025-2 英検準1級 作文 並べ替え Part2</title>
+    <title>英検準1級 作文 並べ替え Part2</title>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
+        /* --- 基本デザイン --- */
         body {
             font-family: 'Kosugi Maru', sans-serif;
             background-color: #e0f2f1;
@@ -86,16 +87,30 @@
             cursor: move;
         }
         .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
-        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 15px; }
         .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+
         @media screen and (max-width: 600px) {
             h2 { font-size: 1.3rem; }
             .question-box { font-size: 1rem; padding: 12px; }
             .word-btn, .answer-word { font-size: 0.95rem; padding: 8px 14px; }
             .container { padding: 10px; }
             .answer-area { min-height: 90px; gap: 6px; }
+        }
+
+        /* --- 印刷用設定（白黒プレーン） --- */
+        #printable-sheet { display: none; }
+        @media print {
+            body { background: white !important; padding: 0; }
+            .no-print { display: none !important; }
+            #printable-sheet { display: block !important; width: 100%; color: black; }
+            .print-q-block { margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+            .print-ja { font-weight: bold; font-size: 12pt; margin-bottom: 10px; }
+            .print-words { font-style: italic; font-size: 10pt; color: #333; margin-bottom: 10px; }
+            .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
+            .answer-key { page-break-before: always; }
         }
     </style>
 </head>
@@ -122,10 +137,19 @@
 
 <div class="fab-container no-print">
     <button class="fab" id="ttsBtn" onclick="speakPhrase()" style="display:none;">🔊</button>
+    <button class="fab" onclick="window.print()">🖨️</button>
+</div>
+
+<div id="printable-sheet">
+    <h1 style="text-align: center;">英検準1級 作文演習 (Part2: Convenience & Safety)</h1>
+    <div id="print-content"></div>
+    <div class="answer-key">
+        <h2>【解答 (Answer Key)】</h2>
+        <div id="print-answers"></div>
+    </div>
 </div>
 
 <script>
-// --- データをここに集約 ---
 const quizData = [
     { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
     { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
@@ -144,7 +168,6 @@ let userSelection = [];
 let dragItem = null;
 let isSpeaking = false;
 
-// --- 初期描画 ---
 function renderQuestion() {
     userSelection = [];
     document.getElementById('resultMsg').textContent = "";
@@ -157,7 +180,6 @@ function renderQuestion() {
     let words = quizData[currentIdx].en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
     const bank = document.getElementById('wordBank');
     bank.innerHTML = "";
-    
     shuffle(words).forEach(w => {
         const btn = document.createElement('button');
         btn.className = "word-btn";
@@ -242,22 +264,30 @@ function checkAnswer() {
     }
 }
 
+// 印刷用データの準備
+function preparePrint() {
+    const content = document.getElementById('print-content');
+    const answers = document.getElementById('print-answers');
+    content.innerHTML = "";
+    answers.innerHTML = "";
+    quizData.forEach((q, i) => {
+        let words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
+        content.innerHTML += `<div class="print-q-block"><div class="print-ja">${i+1}. ${q.ja}</div><div class="print-words">(${words.join(" / ")})</div><div class="print-line"></div></div>`;
+        answers.innerHTML += `<div>${i+1}. ${q.en}</div>`;
+    });
+}
+
 function speak(text) {
     const synth = window.speechSynthesis;
-    if (synth.speaking && isSpeaking) {
-        synth.cancel();
-        return;
-    }
+    if (synth.speaking && isSpeaking) { synth.cancel(); return; }
     synth.cancel();
     const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8;
     uttr.pitch = 1.0;
-
     const voices = synth.getVoices();
     const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
     if (targetVoice) uttr.voice = targetVoice;
-
     uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
     uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
     uttr.onerror = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
@@ -284,6 +314,7 @@ function shuffle(array) {
 }
 
 window.speechSynthesis.onvoiceschanged = () => {};
+preparePrint(); // 印刷用シートをあらかじめ作っておく
 renderQuestion();
 </script>
 </body>
