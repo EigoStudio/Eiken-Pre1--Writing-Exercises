@@ -163,6 +163,9 @@ let currentIdx = 0;
 let userSelection = [];
 let dragItem = null;
 
+    // ★再生・停止の管理用変数★
+let isSpeaking = false;
+
 function renderQuestion() {
     userSelection = [];
     document.getElementById('resultMsg').textContent = "";
@@ -269,16 +272,77 @@ function nextQuestion() {
     else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
 }
 
-function speakPhrase() {
-    const uttr = new SpeechSynthesisUtterance(document.getElementById('orderPhrase').innerText);
+let currentIdx = 0;
+let userSelection = [];
+let dragItem = null;
+
+// ★再生・停止の管理用変数★
+let isSpeaking = false;
+
+// --- (中略: renderQuestion, renderAnswer, checkAnswer などのロジック) ---
+
+// ★ 修正版：再生・停止をコントロールする関数 ★
+function speak(text) {
+    const synth = window.speechSynthesis;
+
+    // もし現在再生中なら、停止して終了
+    if (synth.speaking && isSpeaking) {
+        synth.cancel();
+        setTtsIcon(false);
+        return;
+    }
+
+    synth.cancel(); // 念のため前の音声をクリア
+
+    const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8;
-    uttr.pitch = 1.2; // こだわりの高い声
-    const voices = window.speechSynthesis.getVoices();
-    // Samanthaを優先
-    let samantha = voices.find(v => v.name === 'Samantha');
-    uttr.voice = samantha || voices.find(v => v.name.includes('Google US English')) || voices[0];
-    window.speechSynthesis.speak(uttr);
+    uttr.pitch = 1.0; // ご提示のコードに合わせて1.0（標準）に設定
+
+    const voices = synth.getVoices();
+    const targetVoice = voices.find(v => v.name === 'Google US English') || 
+                        voices.find(v => v.name === 'Samantha') || 
+                        voices.find(v => v.lang === 'en-US') ||
+                        voices.find(v => v.lang.startsWith('en'));
+
+    if (targetVoice) {
+        uttr.voice = targetVoice;
+    }
+
+    // 再生開始時の処理
+    uttr.onstart = () => {
+        isSpeaking = true;
+        setTtsIcon(true);
+    };
+
+    // 再生終了時の処理
+    uttr.onend = () => {
+        isSpeaking = false;
+        setTtsIcon(false);
+    };
+
+    // 再生エラー時（中断など）の処理
+    uttr.onerror = () => {
+        isSpeaking = false;
+        setTtsIcon(false);
+    };
+
+    synth.speak(uttr);
+}
+
+// アイコンを切り替える補助関数
+function setTtsIcon(playing) {
+    const btn = document.getElementById('ttsBtn');
+    if (btn) {
+        btn.textContent = playing ? "⏹️" : "🔊";
+    }
+}
+
+function speakPhrase() {
+    const phraseEl = document.getElementById('orderPhrase');
+    if (phraseEl) {
+        speak(phraseEl.innerText);
+    }
 }
 
 function shuffle(array) {
