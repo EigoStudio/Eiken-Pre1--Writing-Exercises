@@ -2,353 +2,133 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英検準1級 作文Exercise #2 (Convenience & Safety)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2025-2 英検準1級 作文 並べ替え Part2 Convenience & Safety</title>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Kosugi Maru', "Hiragino Maru Gothic ProN", sans-serif;
+            font-family: 'Kosugi Maru', sans-serif;
             background-color: #e0f2f1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            padding-bottom: 100px; /* ③右下ボタンとの干渉を防ぐ余白 */
+            padding: 10px;
+            padding-bottom: 100px;
             color: #004d40;
             margin: 0;
+            overflow-x: hidden;
+            touch-action: pan-y;
         }
 
-        h2 { color: #00695c; margin-bottom: 5px; }
-        .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; line-height: 1.4; }
+        h2 { color: #00695c; margin-top: 15px; margin-bottom: 5px; font-size: 1.6rem; }
+        .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
 
         .container {
             background: white;
-            max-width: 800px;
             width: 100%;
-            padding: 25px;
+            max-width: 900px;
+            padding: 20px;
             border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0, 77, 64, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 77, 64, 0.1);
             text-align: center;
             box-sizing: border-box;
         }
 
         .question-box {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 20px;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
             background-color: #e8f5e9;
             border-radius: 15px;
-            padding: 15px;
+            padding: 18px;
             border-left: 8px solid #4caf50;
-            color: #1b5e20;
             text-align: left;
+            line-height: 1.6;
         }
 
         .answer-area {
-            min-height: 80px;
-            border: 2px dashed #80cbc4;
+            min-height: 110px;
+            border: 3px dashed #80cbc4;
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             padding: 15px;
             background-color: #fafafa;
-            border-radius: 10px;
-            transition: background-color 0.2s;
+            border-radius: 12px;
         }
 
-        .final-sentence {
-            font-size: 1.3rem;
-            color: #004d40;
-            font-weight: bold;
-            padding: 20px;
-            line-height: 1.6;
+        .word-bank { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 12px; 
+            margin-bottom: 20px;
         }
 
-        .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
-
-        /* ①選択肢のバブル：色を薄く、文字を濃く */
         .word-btn {
-            background-color: #b2dfdb; /* 薄いグリーン */
-            color: #004d40;           /* 濃い文字 */
+            background-color: #b2dfdb; 
+            color: #004d40;           
             border: 2px solid #80cbc4;
-            padding: 10px 16px;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0 3px 0 #80cbc4;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 1.1rem;
             font-weight: bold;
+            box-shadow: 0 4px 0 #80cbc4;
+            cursor: pointer;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; }
 
         .answer-word {
             background-color: #ffb300;
             color: #004d40;
-            border: none;
-            padding: 10px 16px;
+            padding: 12px 20px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            cursor: pointer; /* スマホ・PC共通 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             user-select: none;
-            touch-action: manipulation;
+            touch-action: none;
+            cursor: move;
         }
 
-        .fab-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
-        }
-        .fab {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            background-color: #ffb300;
-            color: #004d40;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
+
+        @media screen and (max-width: 600px) {
+            h2 { font-size: 1.3rem; }
+            .question-box { font-size: 1rem; padding: 12px; }
+            .word-btn, .answer-word { font-size: 0.95rem; padding: 8px 14px; }
+            .container { padding: 10px; }
+            .answer-area { min-height: 90px; gap: 6px; }
         }
 
-        .result-msg { font-weight: bold; font-size: 1.2rem; min-height: 35px; margin-bottom: 10px; }
+        .footer-tools { margin-top: 30px; display: flex; justify-content: center; }
 
-        @media print {
-            body { background: white; padding: 0; color: black; }
-            .no-print { display: none !important; }
-            #printable-sheet { display: block !important; width: 100%; }
-            .print-q-block { margin-bottom: 20px; page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-            .print-ja { font-weight: bold; font-size: 11pt; margin-bottom: 5px; }
-            .print-words { font-style: italic; font-size: 10pt; color: #444; margin-bottom: 10px; }
-            .print-line { border-bottom: 1px solid black; height: 30px; width: 95%; margin-top: 10px; }
-            .answer-key { page-break-before: always; }
-        }
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; }
+
+        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
+        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+
+        @media print { .no-print { display: none !important; } #printable-sheet { display: block !important; } }
         #printable-sheet { display: none; }
     </style>
 </head>
 <body>
 
 <div class="no-print" style="text-align: center;">
-    <h2>英検準1級 作文トレーニング #2</h2>
-    <div class="sub-title">Topic: Public Transportation Requirement<br><b>Focus: Convenience & Safety</b></div>
+    <h2>英検準1級 作文 並べ替え Part2</h2>
+    <div class="sub-title">Convenience & Safety</div>
 </div>
 
 <div class="container no-print">
     <div id="game-ui">
-        <div id="questionHeader" style="font-weight: bold; margin-bottom: 10px; color: #00796b;"></div>
+        <div id="questionHeader" style="font-weight: bold; margin-bottom: 10px; font-size: 1rem;"></div>
         <div class="question-box" id="questionText"></div>
         <div class="result-msg" id="resultMsg"></div>
-        <div class="answer-area" id="answerArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; width: 180px; box-shadow: 0 3px 0 #002d20;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; width: 180px; box-shadow: 0 3px 0 #1b5e20;">Next Question</button>
-        </div>
-    </div>
-</div>
-
-<div class="fab-container no-print">
-    <button class="fab" id="ttsBtn" onclick="speakPhrase()" title="読み上げ" style="display:none;">🔊</button>
-    <button class="fab" onclick="window.print()" title="印刷">🖨️</button>
-</div>
-
-<div id="printable-sheet">
-    <h1 style="text-align: center; border-bottom: 2px solid black;">英検準1級 作文演習 (Convenience & Safety)</h1>
-    <div id="print-content"></div>
-    <div class="answer-key">
-        <h3>【解答 (Sample Answers)】</h3>
-        <div id="print-answers"></div>
-    </div>
-</div>
-
-<script>
-let quizDataOriginal = [
-    { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
-    { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
-    { ja: "[Convenience] 自家用車の台数を減らすことで、歩行者に優しい公園や公共広場のためのスペースが増える。", en: "Reducing the number of private vehicles creates more space for pedestrian-friendly parks and public plazas." },
-    { ja: "[Convenience] 整備された鉄道システムは、数千人の通勤者が毎日の交通渋滞で費やす時間の浪費を最小限に抑える。", en: "A well-organized rail system minimizes the time wasted by thousands of commuters in daily traffic jams." },
-    { ja: "[Convenience] 公共交通志向型開発に焦点を当てた都市計画は、より活気あるコミュニティを育む。", en: "Urban planning focused on transit-oriented development fosters a more vibrant community." },
-    { ja: "[Safety] 自家用車の交通量を減らすことは、都市における致命的な道路事故の頻度を大幅に減少させる。", en: "Lowering the volume of private vehicle traffic significantly decreases the frequency of fatal road accidents in cities." },
-    { ja: "[Safety] 車の利用に対する厳格な規制は、子供や高齢者にとってより安全な環境の構築に貢献する。", en: "Strict regulations on car usage contribute to the creation of safer environments for children and the elderly." },
-    { ja: "[Safety] 適切に監視された公共交通は、一人歩きよりも夜間の移動においてより安全な選択肢を提供する。", en: "Public transit systems, when properly monitored, offer a more secure alternative for nighttime travel than walking alone." },
-    { ja: "[Safety] 交通による騒音公害を減らすことは、都市居住者の精神的健康と生産性を向上させる。", en: "Reducing noise pollution from heavy traffic improves the mental well-being and productivity of urban residents." },
-    { ja: "[Safety] 交通拠点まで歩くよう促すことは、健康的な生活を促進し、生活習慣病の蔓延を抑える。", en: "Encouraging people to walk to transit hubs promotes a healthier lifestyle, reducing the prevalence of lifestyle diseases." }
-];
-
-let quizData = [...quizDataOriginal];
-let currentIdx = 0;
-let userSelection = [];
-let isCorrect = false;
-
-function init() {
-    renderQuestion();
-    preparePrint();
-}
-
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-function renderQuestion() {
-    isCorrect = false;
-    userSelection = [];
-    document.getElementById('ttsBtn').style.display = 'none';
-    document.getElementById('nextBtn').style.display = 'none';
-    document.getElementById('checkBtn').style.display = 'block';
-    document.getElementById('resultMsg').textContent = "";
-    document.getElementById('questionHeader').textContent = `Question ${currentIdx + 1} / ${quizData.length}`;
-    const q = quizData[currentIdx];
-    document.getElementById('questionText').innerHTML = q.ja;
-
-    let words = q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
-    let shuffled = shuffle([...words]);
-
-    const bank = document.getElementById('wordBank');
-    bank.innerHTML = "";
-    shuffled.forEach((w, i) => {
-        const btn = document.createElement('button');
-        btn.className = "word-btn";
-        btn.textContent = w;
-        btn.onclick = () => addWord(w, btn);
-        bank.appendChild(btn);
-    });
-    renderAnswer();
-}
-
-function addWord(word, btn) {
-    userSelection.push({ text: word, btn: btn });
-    btn.classList.add('used');
-    renderAnswer();
-}
-
-function renderAnswer() {
-    const area = document.getElementById('answerArea');
-    area.innerHTML = "";
-    if (userSelection.length === 0 && !isCorrect) {
-        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 配置後もドラッグやタップで順序変更可能</span>';
-    }
-    userSelection.forEach((obj, i) => {
-        const btn = document.createElement('button');
-        btn.className = "answer-word";
-        btn.textContent = obj.text;
-        btn.draggable = true;
-        
-        // PC用ドラッグ開始
-        btn.ondragstart = (e) => {
-            e.dataTransfer.setData("text/plain", i);
-            btn.style.opacity = "0.5";
-        };
-        btn.ondragend = () => { btn.style.opacity = "1"; };
-
-        // スマホ用簡易入れ替え：タップで一つ前に移動（連続タップで好きな位置へ）
-        btn.onclick = () => {
-            if (i > 0) {
-                const item = userSelection.splice(i, 1)[0];
-                userSelection.splice(i - 1, 0, item);
-                renderAnswer();
-            } else {
-                // 先頭でタップしたら削除してWord Bankに戻す
-                removeWord(i);
-            }
-        };
-        area.appendChild(btn);
-    });
-}
-
-function allowDrop(e) { e.preventDefault(); }
-function drop(e) {
-    e.preventDefault();
-    const fromIdx = e.dataTransfer.getData("text/plain");
-    const target = e.target;
-    if (target.className === "answer-word") {
-        const toIdx = Array.from(target.parentNode.children).indexOf(target);
-        const item = userSelection.splice(fromIdx, 1)[0];
-        userSelection.splice(toIdx, 0, item);
-        renderAnswer();
-    }
-}
-
-function removeWord(i) {
-    userSelection[i].btn.classList.remove('used');
-    userSelection.splice(i, 1);
-    renderAnswer();
-}
-
-function checkAnswer() {
-    const userStr = userSelection.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
-    const q = quizData[currentIdx];
-    if (userStr === q.en) {
-        isCorrect = true;
-        document.getElementById('resultMsg').innerHTML = "<span style='color:#2e7d32;'>Excellent! 社会的な視点での記述が完璧です。</span>";
-        document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
-        document.getElementById('wordBank').innerHTML = "";
-        document.getElementById('ttsBtn').style.display = 'flex';
-        document.getElementById('checkBtn').style.display = 'none';
-        document.getElementById('nextBtn').style.display = 'block';
-    } else {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:#c62828;'>惜しい！広い視点での文構造を意識しましょう。</span>";
-    }
-}
-
-function speak(text) {
-    const synth = window.speechSynthesis;
-    synth.cancel(); 
-    const uttr = new SpeechSynthesisUtterance(text);
-    uttr.lang = "en-US";
-    uttr.rate = 0.8; 
-    uttr.pitch = 1.1; 
-    const voices = synth.getVoices();
-    const targetVoice = 
-        voices.find(v => v.name.includes('Samantha')) ||        
-        voices.find(v => v.name.includes('Google US English')) || 
-        voices.find(v => v.name.includes('Zira')) ||            
-        voices.find(v => v.lang === 'en-US') ||
-        voices.find(v => v.lang.startsWith('en'));
-    if (targetVoice) { uttr.voice = targetVoice; }
-    synth.speak(uttr);
-}
-
-function speakPhrase() {
-    const phrase = document.getElementById('orderPhrase').innerText;
-    speak(phrase);
-}
-
-function nextQuestion() {
-    currentIdx++;
-    if (currentIdx < quizData.length) renderQuestion();
-    else {
-        document.getElementById('game-ui').innerHTML = "<h2 style='color:#2e7d32;'>🎉 All Tasks Completed!</h2><p>高度な社会視点フレーズを全てマスターしました！</p>";
-    }
-}
-
-function preparePrint() {
-    const container = document.getElementById('print-content');
-    const keyContainer = document.getElementById('print-answers');
-    container.innerHTML = ""; keyContainer.innerHTML = "";
-    quizDataOriginal.forEach((q, i) => {
-        let words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
-        container.innerHTML += `<div class="print-q-block"><div class="print-ja">${i+1}. ${q.ja}</div><div class="print-words">(${words.join(" / ")})</div><div class="print-line"></div></div>`;
-        keyContainer.innerHTML += `<div>${i+1}. ${q.en}</div>`;
-    });
-}
-window.speechSynthesis.onvoiceschanged = () => {};
-init();
-</script>
-</body>
-</html>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px; box-shadow: 0 4px 0 #002d20;">Check Answer</button>
+            <button class="word-btn" id="nextBtn
