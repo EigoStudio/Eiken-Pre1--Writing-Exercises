@@ -8,9 +8,8 @@
     
     <style>
         body {
-            /* 全体にKosugi Maruを適用 */
             font-family: 'Kosugi Maru', sans-serif;
-            background-color: #f0f8ff; /* 少し青みがかった優しい背景色 */
+            background-color: #f0f8ff;
             color: #333;
             text-align: center;
             padding: 20px;
@@ -20,33 +19,53 @@
             color: #2c3e50;
             margin-bottom: 30px;
             font-size: 28px;
-            /* タイトルに少し影をつけて目立たせる */
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
+        
+        /* 縦3列に並べるための設定
+        */
         ul {
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
-            max-width: 1000px;
+            /* 画面が広いときは3列、狭いときは自動調整 */
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px;
+            max-width: 900px;
             margin: 0 auto;
         }
+
+        /* スマホなどの狭い画面では1列または2列にするレスポンシブ設定 */
+        @media (max-width: 768px) {
+            ul {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
         li a {
-            display: block;
-            padding: 15px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px; /* ボタンの高さを揃える */
+            padding: 15px 10px;
             background-color: #ffffff;
-            border: 3px solid #ffcc00; /* 元気な黄色い枠線 */
-            border-radius: 15px; /* 角をさらに丸く */
+            border: 3px solid #ffcc00;
+            border-radius: 15px;
             text-decoration: none;
-            color: #d35400; /* オレンジ系の文字色 */
+            color: #d35400;
             font-weight: bold;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 0 #e6b800; /* ボタンっぽく立体的な影 */
+            box-shadow: 0 4px 0 #e6b800;
+            line-height: 1.4;
         }
-        /* マウスを乗せた時やタップした時 */
+        
         li a:hover {
-            transform: translateY(2px); /* 少し沈む動き */
+            transform: translateY(2px);
             box-shadow: 0 2px 0 #e6b800;
             background-color: #fffdf0;
         }
@@ -55,16 +74,24 @@
 <body>
 
     <h1>英検準1級 Writing Exercises</h1>
+
     <ul>
-      <li><a href="2025-2-Writing-Part1-Pollution-Costs.html">2025-1 作文<br> 
-          並べ替え問題 Par1 Pollution & Costs</a></li>
-          </ul>
-    <ul>
-      <li><a href="2024-1-作文-Part2-Convenience-Safety.html">2024-1 Part2 Pollution & Costs</a></li>
-          </ul>
-    <ul>
-      <li><a href="putting-words-in-order-1.html">#1 SVOC構文</a></li>
-          </ul>
+        <li>
+            <a href="2025-2-Writing-Part1-Pollution-Costs.html">
+                2025-2 作文<br>並べ替え Part1<br>Pollution & Costs
+            </a>
+        </li>
+        <li>
+            <a href="2025-2-Writing-Part2-Convenience-Safety.html">
+                2025-2 作文<br>並べ替え Part2<br>Convenience & Safety
+            </a>
+        </li>
+        <li>
+            <a href="putting-words-in-order-1.html">
+                基礎トレーニング<br>#1 SVOC構文
+            </a>
+        </li>
+    </ul>
 
 </body>
 </html>
