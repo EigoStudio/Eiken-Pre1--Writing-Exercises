@@ -17,8 +17,6 @@
             color: #004d40;
             margin: 0;
             overflow-x: hidden;
-            /* ページ全体のスクロールを防ぐ設定（ドラッグ優先） */
-            touch-action: none;
         }
         h2 { color: #00695c; margin-top: 15px; margin-bottom: 5px; font-size: 1.6rem; }
         .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
@@ -31,8 +29,6 @@
             box-shadow: 0 8px 25px rgba(0, 77, 64, 0.1);
             text-align: center;
             box-sizing: border-box;
-            /* コンテナ内はスクロールを許可 */
-            touch-action: auto;
         }
         .question-box {
             font-size: 1.2rem;
@@ -56,7 +52,6 @@
             padding: 15px;
             background-color: #fafafa;
             border-radius: 12px;
-            position: relative;
         }
         .word-bank { 
             display: flex; 
@@ -87,17 +82,15 @@
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             user-select: none;
-            /* ドラッグ操作のみに集中させる */
             touch-action: none;
             cursor: move;
-            position: relative;
         }
 
         .dragging {
             opacity: 0.6;
             transform: scale(1.1);
             z-index: 1000;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            pointer-events: none; /* マウスの下の要素を検知するために必要 */
         }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 15px; }
@@ -105,27 +98,25 @@
         
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
-        
-        @media screen and (max-width: 600px) {
-            h2 { font-size: 1.3rem; }
-            .question-box { font-size: 1rem; padding: 12px; }
-            .word-btn, .answer-word { font-size: 0.95rem; padding: 8px 14px; }
-            .container { padding: 10px; }
-            .answer-area { min-height: 90px; gap: 6px; }
-        }
 
-        /* 印刷設定 */
-        @media print {
-            .no-print { display: none !important; }
-            #printable-sheet { display: block !important; width: 100%; color: black; background: white; }
-            .print-q-block { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
-        }
+        /* --- 印刷用設定（プレーンな白黒） --- */
         #printable-sheet { display: none; }
+        @media print {
+            body { background: white !important; padding: 0; }
+            .no-print { display: none !important; }
+            #printable-sheet { display: block !important; width: 100%; color: black; font-family: serif; }
+            .print-header { text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; }
+            .print-q-block { margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+            .print-ja { font-weight: bold; font-size: 12pt; margin-bottom: 10px; }
+            .print-words { font-style: italic; font-size: 10pt; color: #333; margin-bottom: 10px; }
+            .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
+            .answer-key { page-break-before: always; border-top: 2px solid black; padding-top: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="no-print">
+<div class="no-print" style="text-align: center;">
     <h2>英検準1級 作文 並べ替え Part2</h2>
     <div class="sub-title">Convenience & Safety</div>
 </div>
@@ -138,8 +129,8 @@
         <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white;">Next Question</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 180px;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 180px;">Next Question</button>
         </div>
     </div>
 </div>
@@ -147,6 +138,17 @@
 <div class="fab-container no-print">
     <button class="fab" id="ttsBtn" onclick="speakPhrase()" style="display:none;">🔊</button>
     <button class="fab" onclick="window.print()">🖨️</button>
+</div>
+
+<div id="printable-sheet">
+    <div class="print-header">
+        <h1>英検準1級 英作文トレーニングシート (Part 2)</h1>
+    </div>
+    <div id="print-content"></div>
+    <div class="answer-key">
+        <h2>【解答 (Sample Answers)】</h2>
+        <div id="print-answers"></div>
+    </div>
 </div>
 
 <script>
@@ -167,6 +169,25 @@ let currentIdx = 0;
 let userSelection = [];
 let dragIndex = null;
 let isSpeaking = false;
+
+// 印刷用シートを作成する関数
+function preparePrint() {
+    const printContent = document.getElementById('print-content');
+    const printAnswers = document.getElementById('print-answers');
+    printContent.innerHTML = "";
+    printAnswers.innerHTML = "";
+
+    quizData.forEach((q, i) => {
+        const words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
+        printContent.innerHTML += `
+            <div class="print-q-block">
+                <div class="print-ja">${i + 1}. ${q.ja}</div>
+                <div class="print-words">(${words.join(" / ")})</div>
+                <div class="print-line"></div>
+            </div>`;
+        printAnswers.innerHTML += `<div>${i + 1}. ${q.en}</div>`;
+    });
+}
 
 function renderQuestion() {
     userSelection = [];
@@ -207,22 +228,20 @@ function renderAnswer() {
         if (i === dragIndex) span.classList.add('dragging');
         span.textContent = obj.text;
         
-        let startX, startY, moved;
+        let moved = false;
+        let startX, startY;
 
-        // --- Pointerロジック（マウス・タッチ共通） ---
         span.onpointerdown = (e) => {
             span.setPointerCapture(e.pointerId);
             dragIndex = i;
             startX = e.clientX;
             startY = e.clientY;
-            moved = false;
-            renderAnswer(); 
+            renderAnswer();
         };
 
         span.onpointermove = (e) => {
-            if (dragIndex !== i) return;
+            if (dragIndex === null || dragIndex !== i) return;
 
-            // 5px以上動いたらドラッグとみなす
             if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
                 moved = true;
                 const target = document.elementFromPoint(e.clientX, e.clientY);
@@ -241,12 +260,12 @@ function renderAnswer() {
         };
 
         span.onpointerup = (e) => {
-            if (dragIndex !== i) return;
+            if (dragIndex === null || dragIndex !== i) return;
             span.releasePointerCapture(e.pointerId);
+            const wasMoved = moved;
             dragIndex = null;
             
-            // 全く動かさずに指を離した＝「削除（戻す）」
-            if (!moved) {
+            if (!wasMoved) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
             }
@@ -260,7 +279,7 @@ function renderAnswer() {
 function checkAnswer() {
     const userStr = userSelection.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
     if (userStr === quizData[currentIdx].en) {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent!</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:green; font-weight:bold;'>Excellent! 正解です。</span>";
         document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
         document.getElementById('wordBank').innerHTML = "";
         document.getElementById('checkBtn').style.display = "none";
@@ -268,7 +287,7 @@ function checkAnswer() {
         document.getElementById('ttsBtn').style.display = "flex";
         document.getElementById('ttsBtn').textContent = "🔊";
     } else {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again!</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again! 語順を確認してください。</span>";
     }
 }
 
@@ -296,18 +315,21 @@ function speakPhrase() {
 function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) renderQuestion();
-    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
+    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 すべて完了しました！</h2>";
 }
 
 function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
     }
-    return array;
+    return newArr;
 }
 
 window.speechSynthesis.onvoiceschanged = () => {};
+// ページ読み込み時に印刷用データを生成
+preparePrint();
 renderQuestion();
 </script>
 </body>
