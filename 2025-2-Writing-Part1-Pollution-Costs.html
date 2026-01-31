@@ -225,56 +225,56 @@ function addWord(word, btn) {
 
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = "";
-    if (userSelection.length === 0 && !isCorrect) {
-        area.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 指で引っぱって並べ替え</span>';
-    }
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.85rem;">タップで追加 / 配置後もタップで戻す・長押しで入れ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
-        const btn = document.createElement('button');
-        btn.className = "answer-word";
-        btn.textContent = obj.text;
+        const span = document.createElement('div');
+        span.className = "answer-word";
+        span.textContent = obj.text;
         
-        // --- スマホ＆PC対応ドラッグロジック ---
-        
-        // PC用（Mouse Events）
-        btn.draggable = true;
-        btn.ondragstart = (e) => {
-            e.dataTransfer.setData("text/plain", i);
-            btn.classList.add('dragging');
-        };
-        btn.ondragend = () => btn.classList.remove('dragging');
-        
-        // PC用（Drop）
-        btn.ondragover = (e) => e.preventDefault();
-        btn.ondrop = (e) => {
-            e.preventDefault();
-            const fromIdx = e.dataTransfer.getData("text/plain");
-            moveItem(parseInt(fromIdx), i);
+        // --- タップで戻す機能（クリック・タッチ両対応） ---
+        // 指が動かなかった場合のみ「戻す」を実行するように制御
+        let moved = false;
+        span.onpointerdown = (e) => {
+            moved = false;
+            dragItem = i;
+            span.classList.add('dragging');
+            span.setPointerCapture(e.pointerId);
         };
 
-        // スマホ用（Touch Events）
-        btn.ontouchstart = (e) => {
-            btn.classList.add('dragging');
-            btn.dataset.index = i;
-        };
+        span.onpointermove = (e) => {
+            if (dragItem === null) return;
+            // 5ピクセル以上動いたら「移動モード」と判定
+            if (Math.abs(e.movementX) > 5 || Math.abs(e.movementY) > 5) {
+                moved = true;
+            }
 
-        btn.ontouchend = (e) => {
-            btn.classList.remove('dragging');
-            const touch = e.changedTouches[0];
-            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-            
-            if (targetEl && targetEl.classList.contains('answer-word')) {
-                // 他の単語の上にドロップされた場合
-                const targetIdx = Array.from(area.children).indexOf(targetEl);
-                moveItem(i, targetIdx);
-            } else if (!targetEl || !targetEl.closest('.answer-area')) {
-                // エリア外に放り出されたら削除
-                removeWord(i);
+            const target = document.elementFromPoint(e.clientX, e.clientY);
+            if (target && target.classList.contains('answer-word')) {
+                const targetIdx = Array.from(area.children).indexOf(target);
+                if (targetIdx !== dragItem) {
+                    const temp = userSelection.splice(dragItem, 1)[0];
+                    userSelection.splice(targetIdx, 0, temp);
+                    dragItem = targetIdx;
+                    renderAnswer(); // リアルタイムで入れ替え
+                }
             }
         };
 
-        area.appendChild(btn);
+        span.onpointerup = (e) => {
+            span.classList.remove('dragging');
+            const wasDragging = moved;
+            dragItem = null;
+            
+            // 動かさずに指を離した（＝タップした）場合、下に戻す
+            if (!wasDragging) {
+                obj.btn.classList.remove('used');
+                userSelection.splice(i, 1);
+                renderAnswer();
+            }
+        };
+
+        area.appendChild(span);
     });
 }
 
