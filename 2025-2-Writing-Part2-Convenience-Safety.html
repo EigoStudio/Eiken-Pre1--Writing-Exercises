@@ -6,7 +6,6 @@
     <title>英検準1級 作文 並べ替え Part2</title>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
-        /* --- 基本デザイン --- */
         body {
             font-family: 'Kosugi Maru', sans-serif;
             background-color: #e0f2f1;
@@ -24,7 +23,7 @@
         .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
         .container {
             background: white;
-            width: 100%;
+            width: 95%;
             max-width: 900px;
             padding: 20px;
             border-radius: 20px;
@@ -91,7 +90,7 @@
         .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
         .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
-
+        
         @media screen and (max-width: 600px) {
             h2 { font-size: 1.3rem; }
             .question-box { font-size: 1rem; padding: 12px; }
@@ -99,24 +98,20 @@
             .container { padding: 10px; }
             .answer-area { min-height: 90px; gap: 6px; }
         }
-
-        /* --- 印刷用設定（白黒プレーン） --- */
+        /* --- 印刷用設定 --- */
         #printable-sheet { display: none; }
         @media print {
             body { background: white !important; padding: 0; }
             .no-print { display: none !important; }
             #printable-sheet { display: block !important; width: 100%; color: black; }
-            .print-q-block { margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
-            .print-ja { font-weight: bold; font-size: 12pt; margin-bottom: 10px; }
-            .print-words { font-style: italic; font-size: 10pt; color: #333; margin-bottom: 10px; }
+            .print-q-block { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
             .print-line { border-bottom: 1px solid black; height: 35px; width: 100%; margin-top: 10px; }
-            .answer-key { page-break-before: always; }
         }
     </style>
 </head>
 <body>
 
-<div class="no-print" style="text-align: center;">
+<div class="no-print">
     <h2>英検準1級 作文 並べ替え Part2</h2>
     <div class="sub-title">Convenience & Safety</div>
 </div>
@@ -141,12 +136,8 @@
 </div>
 
 <div id="printable-sheet">
-    <h1 style="text-align: center;">英検準1級 作文演習 (Part2: Convenience & Safety)</h1>
+    <h1 style="text-align: center;">英検準1級 作文演習 (Part2)</h1>
     <div id="print-content"></div>
-    <div class="answer-key">
-        <h2>【解答 (Answer Key)】</h2>
-        <div id="print-answers"></div>
-    </div>
 </div>
 
 <script>
@@ -180,6 +171,7 @@ function renderQuestion() {
     let words = quizData[currentIdx].en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0);
     const bank = document.getElementById('wordBank');
     bank.innerHTML = "";
+    
     shuffle(words).forEach(w => {
         const btn = document.createElement('button');
         btn.className = "word-btn";
@@ -196,13 +188,15 @@ function renderQuestion() {
     renderAnswer();
 }
 
+// ★ マウス操作でも「うざくない」最強の入れ替えロジック ★
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 戻す・長押しで並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / マウスで自由に並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
         span.className = "answer-word";
+        if (i === dragItem) span.classList.add('dragging');
         span.textContent = obj.text;
         
         let moved = false;
@@ -212,38 +206,45 @@ function renderAnswer() {
             moved = false;
             startX = e.clientX;
             startY = e.clientY;
-            dragItem = i; 
-            span.classList.add('dragging');
+            dragItem = i;
             span.setPointerCapture(e.pointerId);
+            renderAnswer(); // 掴んだ瞬間に色を変える
         };
 
         span.onpointermove = (e) => {
-            if (dragItem === null) return;
-            if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) moved = true;
+            if (dragItem !== i) return;
+            
+            if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+                moved = true;
+            }
 
             if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
-                if (target && target.classList.contains('answer-word')) {
-                    const targetIdx = Array.from(area.children).indexOf(target);
-                    if (targetIdx !== dragItem && targetIdx !== -1) {
+                const targetEl = target ? target.closest('.answer-word') : null;
+                
+                if (targetEl && targetEl !== span) {
+                    const targetIdx = Array.from(area.children).indexOf(targetEl);
+                    if (targetIdx !== -1) {
                         const temp = userSelection.splice(dragItem, 1)[0];
                         userSelection.splice(targetIdx, 0, temp);
-                        dragItem = targetIdx;
-                        renderAnswer();
+                        dragItem = targetIdx; // 掴んでいるインデックスを更新
+                        renderAnswer(); 
                     }
                 }
             }
         };
 
         span.onpointerup = (e) => {
-            span.classList.remove('dragging');
+            if (dragItem !== i) return;
+            span.releasePointerCapture(e.pointerId);
             const wasActuallyDragging = moved;
             dragItem = null;
+            
             if (!wasActuallyDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
-                renderAnswer();
             }
+            renderAnswer();
         };
         area.appendChild(span);
     });
@@ -264,19 +265,6 @@ function checkAnswer() {
     }
 }
 
-// 印刷用データの準備
-function preparePrint() {
-    const content = document.getElementById('print-content');
-    const answers = document.getElementById('print-answers');
-    content.innerHTML = "";
-    answers.innerHTML = "";
-    quizData.forEach((q, i) => {
-        let words = shuffle(q.en.replace(/([.,])/g, " $1").split(/\s+/).filter(w => w.length > 0));
-        content.innerHTML += `<div class="print-q-block"><div class="print-ja">${i+1}. ${q.ja}</div><div class="print-words">(${words.join(" / ")})</div><div class="print-line"></div></div>`;
-        answers.innerHTML += `<div>${i+1}. ${q.en}</div>`;
-    });
-}
-
 function speak(text) {
     const synth = window.speechSynthesis;
     if (synth.speaking && isSpeaking) { synth.cancel(); return; }
@@ -284,13 +272,16 @@ function speak(text) {
     const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
     uttr.rate = 0.8;
-    uttr.pitch = 1.0;
+    uttr.pitch = 1.2; // Samanthaの少し高めの声
+
     const voices = synth.getVoices();
-    const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
+    // Google US English か Samantha を優先
+    const targetVoice = voices.find(v => v.name === 'Google US English') || 
+                        voices.find(v => v.name === 'Samantha') || voices[0];
     if (targetVoice) uttr.voice = targetVoice;
+
     uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
     uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
-    uttr.onerror = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
     synth.speak(uttr);
 }
 
@@ -314,7 +305,6 @@ function shuffle(array) {
 }
 
 window.speechSynthesis.onvoiceschanged = () => {};
-preparePrint(); // 印刷用シートをあらかじめ作っておく
 renderQuestion();
 </script>
 </body>
