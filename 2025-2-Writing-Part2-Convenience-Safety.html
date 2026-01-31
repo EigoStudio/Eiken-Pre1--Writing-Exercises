@@ -255,14 +255,31 @@ function nextQuestion() {
     else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
 }
 
-function speakPhrase() {
-    const uttr = new SpeechSynthesisUtterance(document.getElementById('orderPhrase').innerText);
+// ★若い女性の声（Samantha優先）に特化した読み上げ関数★
+function speak(text) {
+    const synth = window.speechSynthesis;
+    synth.cancel(); // 前の音声をキャンセル
+
+    const uttr = new SpeechSynthesisUtterance(text);
     uttr.lang = "en-US";
-    uttr.rate = 0.8;
-    uttr.pitch = 1.1;
-    const voices = window.speechSynthesis.getVoices();
-    uttr.voice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English')) || voices[0];
-    window.speechSynthesis.speak(uttr);
+    uttr.rate = 0.8;  // ご要望通りの速さ
+    uttr.pitch = 1.2; // 少し高くして「若い感じ」に調整
+
+    // 利用可能な声のリストを取得
+    const voices = synth.getVoices();
+    
+    // Samanthaを最優先、次いでGoogleの女性声を探す
+    const targetVoice = 
+        voices.find(v => v.name === 'Samantha') || 
+        voices.find(v => v.name.includes('Google US English')) || 
+        voices.find(v => v.name.includes('Female')) ||
+        voices.find(v => v.lang === 'en-US');
+
+    if (targetVoice) {
+        uttr.voice = targetVoice;
+    }
+
+    synth.speak(uttr);
 }
 
 function shuffle(array) {
