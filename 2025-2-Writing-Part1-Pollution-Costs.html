@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2025-2 英検準1級 作文 並べ替え Part2</title>
+    <title>2025-2 英検準1級 作文 並べ替え Part1</title>
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
         body {
@@ -19,8 +19,10 @@
             overflow-x: hidden;
             touch-action: pan-y;
         }
+
         h2 { color: #00695c; margin-top: 15px; margin-bottom: 5px; font-size: 1.6rem; }
         .sub-title { font-size: 0.9rem; color: #00796b; margin-bottom: 20px; text-align: center; }
+
         .container {
             background: white;
             width: 100%;
@@ -31,6 +33,7 @@
             text-align: center;
             box-sizing: border-box;
         }
+
         .question-box {
             font-size: 1.2rem;
             font-weight: bold;
@@ -42,6 +45,7 @@
             text-align: left;
             line-height: 1.6;
         }
+
         .answer-area {
             min-height: 110px;
             border: 3px dashed #80cbc4;
@@ -54,6 +58,7 @@
             background-color: #fafafa;
             border-radius: 12px;
         }
+
         .word-bank { 
             display: flex; 
             flex-wrap: wrap; 
@@ -61,6 +66,7 @@
             gap: 12px; 
             margin-bottom: 20px;
         }
+
         .word-btn {
             background-color: #b2dfdb; 
             color: #004d40;           
@@ -72,7 +78,8 @@
             box-shadow: 0 4px 0 #80cbc4;
             cursor: pointer;
         }
-        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd !important; border-color: #d7d7d7; box-shadow: none; pointer-events: none; }
+        .word-btn.used { background-color: #e0e0e0; color: #bdbdbd; border-color: #d7d7d7; box-shadow: none; }
+
         .answer-word {
             background-color: #ffb300;
             color: #004d40;
@@ -85,11 +92,10 @@
             touch-action: none;
             cursor: move;
         }
+
+        /* ドラッグ中の見た目：よりはっきりと */
         .dragging { opacity: 0.4; transform: scale(1.05); outline: 2px solid #004d40; z-index: 1000; }
-        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
-        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; }
-        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
-        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+
         @media screen and (max-width: 600px) {
             h2 { font-size: 1.3rem; }
             .question-box { font-size: 1rem; padding: 12px; }
@@ -97,13 +103,24 @@
             .container { padding: 10px; }
             .answer-area { min-height: 90px; gap: 6px; }
         }
+
+        .footer-tools { margin-top: 30px; display: flex; justify-content: center; }
+
+        .fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; }
+        .fab { width: 65px; height: 65px; border-radius: 50%; border: none; background-color: #ffb300; color: #004d40; font-size: 1.8rem; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; }
+
+        .result-msg { font-weight: bold; margin-bottom: 15px; min-height: 30px; font-size: 1.2rem; }
+        .final-sentence { font-size: 1.5rem; font-weight: bold; padding: 25px; line-height: 1.6; color: #004d40; }
+
+        @media print { .no-print { display: none !important; } #printable-sheet { display: block !important; } }
+        #printable-sheet { display: none; }
     </style>
 </head>
 <body>
 
 <div class="no-print" style="text-align: center;">
-    <h2>英検準1級 作文 並べ替え Part2</h2>
-    <div class="sub-title">Convenience & Safety</div>
+    <h2>英検準1級 作文 並べ替え Part1</h2>
+    <div class="sub-title">Pollution & Costs</div>
 </div>
 
 <div class="container no-print">
@@ -114,8 +131,12 @@
         <div class="answer-area" id="answerArea"></div>
         <div class="word-bank" id="wordBank"></div>
         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white;">Check Answer</button>
-            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white;">Next Question</button>
+            <button class="word-btn" id="checkBtn" onclick="checkAnswer()" style="background-color: #004d40; color: white; min-width: 200px; box-shadow: 0 4px 0 #002d20;">Check Answer</button>
+            <button class="word-btn" id="nextBtn" onclick="nextQuestion()" style="display:none; background-color: #2e7d32; color: white; min-width: 200px; box-shadow: 0 4px 0 #1b5e20;">Next Question</button>
+        </div>
+        
+        <div class="footer-tools no-print">
+            <button class="word-btn" onclick="window.print()" style="background-color: #607d8b; color: white; font-size: 0.8rem; padding: 8px 15px; box-shadow: 0 3px 0 #455a64;">🖨️ 印刷用ページを表示</button>
         </div>
     </div>
 </div>
@@ -125,23 +146,22 @@
 </div>
 
 <script>
-const quizData = [
-    { ja: "[Convenience] 自家用車よりも公共交通を優先することは、すべての市民に対する不可欠なサービスへのより公平なアクセスを保証する。", en: "Prioritizing public transit over private cars ensures more equitable access to essential services for all citizens." },
-    { ja: "[Convenience] バス運行へのスマート技術の統合は、都市の移動の全体的な効率を最適化する。", en: "The integration of smart technology into bus schedules optimizes the overall efficiency of urban movement." },
-    { ja: "[Convenience] 自家用車の台数を減らすことで、歩行者に優しい公園や公共広場のためのスペースが増える。", en: "Reducing the number of private vehicles creates more space for pedestrian-friendly parks and public plazas." },
-    { ja: "[Convenience] 整備された鉄道システムは、数千人の通勤者が毎日の交通渋滞で費やす時間の浪費を最小限に抑える。", en: "A well-organized rail system minimizes the time wasted by thousands of commuters in daily traffic jams." },
-    { ja: "[Convenience] 公共交通志向型開発に焦点を当てた都市計画は、より活気あるコミュニティを育む。", en: "Urban planning focused on transit-oriented development fosters a more vibrant community." },
-    { ja: "[Safety] 自家用車の交通量を減らすことは、都市における致命的な道路事故の頻度を大幅に減少させる。", en: "Lowering the volume of private vehicle traffic significantly decreases the frequency of fatal road accidents in cities." },
-    { ja: "[Safety] 車の利用に対する厳格な規制は、子供や高齢者にとってより安全な環境の構築に貢献する。", en: "Strict regulations on car usage contribute to the creation of safer environments for children and the elderly." },
-    { ja: "[Safety] 適切に監視された公共交通は、一人歩きよりも夜間の移動においてより安全な選択肢を提供する。", en: "Public transit systems, when properly monitored, offer a more secure alternative for nighttime travel than walking alone." },
-    { ja: "[Safety] 交通による騒音公害を減らすことは、都市居住者の精神的健康と生産性を向上させる。", en: "Reducing noise pollution from heavy traffic improves the mental well-being and productivity of urban residents." },
-    { ja: "[Safety] 交通拠点まで歩くよう促すことは、健康的な生活を促進し、生活習慣病の蔓延を抑える。", en: "Encouraging people to walk to transit hubs promotes a healthier lifestyle, reducing the prevalence of lifestyle diseases." }
+let quizData = [
+    { ja: "[Pollution] 公共交通機関の利用を義務付けることは、都市部の全体的な炭素足跡を劇的に削減する可能性がある。", en: "Mandating public transport usage could drastically reduce the overall carbon footprint of metropolitan areas." },
+    { ja: "[Pollution] 都市中心部の空気の質を改善することは、公衆衛生支出の長期的な節約に直結する。", en: "Improving air quality in city centers directly leads to long-term savings in public healthcare expenditures." },
+    { ja: "[Pollution] 持続可能な通勤に向けた社会全体での取り組みは、加速する地球温暖化の影響を緩和するために不可欠である。", en: "Collective action toward sustainable commuting is essential to mitigate the accelerating effects of global warming." },
+    { ja: "[Pollution] 自家用車から電気バスへの移行は、より環境意識の高い都市インフラを促進する。", en: "Transitioning from private cars to electric buses promotes a more environmentally conscious urban infrastructure." },
+    { ja: "[Pollution] 交通渋滞の緩和は、人口密集地における窒素酸化物の排出を大幅に減少させる。", en: "The reduction of traffic congestion significantly lowers the emission of nitrogen oxides in densely populated zones." },
+    { ja: "[Costs] 包括的な交通システムへの投資は、労働力の流動性を高めることで地域経済を活性化させる。", en: "Investing in comprehensive transit systems stimulates local economies by enhancing the mobility of the workforce." },
+    { ja: "[Costs] 広大な道路網の維持は、地方自治体の納税者に重い財政的負担を強いる。", en: "The maintenance of extensive road networks imposes a heavy financial burden on municipal taxpayers." },
+    { ja: "[Costs] 公共交通機関への助成は、高速道路を拡張するよりも費用対効果が高い場合がある。", en: "Subsidizing public transportation can be more cost-effective than expanding highways to accommodate private vehicles." },
+    { ja: "[Costs] 輸入化石燃料への依存を減らすことは、国家の経済的安定とエネルギー安全保障を強化する。", en: "Reducing dependence on imported fossil fuels enhances the economic stability and energy security of the nation." },
+    { ja: "[Costs] 効率的な交通網は、不動産価値を高め、未開発の都市地区への商業投資を呼び込む。", en: "Efficient transit networks increase property values and attract commercial investments to underdeveloped urban districts." }
 ];
 
 let currentIdx = 0;
 let userSelection = [];
 let dragItem = null;
-let isSpeaking = false;
 
 function renderQuestion() {
     userSelection = [];
@@ -173,7 +193,7 @@ function renderQuestion() {
 
 function renderAnswer() {
     const area = document.getElementById('answerArea');
-    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 戻す・長押しで並べ替え</span>' : "";
+    area.innerHTML = userSelection.length === 0 ? '<span style="color:#aaa; font-size:0.9rem;">タップで追加 / 配置後もタップで戻す・長押しスライドで並べ替え</span>' : "";
 
     userSelection.forEach((obj, i) => {
         const span = document.createElement('div');
@@ -181,26 +201,26 @@ function renderAnswer() {
         span.textContent = obj.text;
         
         let moved = false;
-        let startX, startY;
-
         span.onpointerdown = (e) => {
             moved = false;
-            startX = e.clientX;
-            startY = e.clientY;
-            dragItem = i; 
+            dragItem = i; // ここで初めて「入れ替え準備OK」のフラグを立てる
             span.classList.add('dragging');
             span.setPointerCapture(e.pointerId);
         };
 
         span.onpointermove = (e) => {
-            if (dragItem === null) return;
-            if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) moved = true;
+            if (dragItem === null) return; // ボタンが押されていないホバー状態なら何もしない
+            
+            // 意図的なドラッグかどうか判定（微細な動きはタップとみなす）
+            if (Math.abs(e.movementX) > 1 || Math.abs(e.movementY) > 1) {
+                moved = true;
+            }
 
             if (moved) {
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (target && target.classList.contains('answer-word')) {
                     const targetIdx = Array.from(area.children).indexOf(target);
-                    if (targetIdx !== dragItem && targetIdx !== -1) {
+                    if (targetIdx !== dragItem) {
                         const temp = userSelection.splice(dragItem, 1)[0];
                         userSelection.splice(targetIdx, 0, temp);
                         dragItem = targetIdx;
@@ -212,9 +232,11 @@ function renderAnswer() {
 
         span.onpointerup = (e) => {
             span.classList.remove('dragging');
-            const wasActuallyDragging = moved;
+            const wasDragging = moved;
             dragItem = null;
-            if (!wasActuallyDragging) {
+            
+            // 動かさずに指/マウスを離した場合は「戻す（削除）」を実行
+            if (!wasDragging) {
                 obj.btn.classList.remove('used');
                 userSelection.splice(i, 1);
                 renderAnswer();
@@ -227,47 +249,31 @@ function renderAnswer() {
 function checkAnswer() {
     const userStr = userSelection.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
     if (userStr === quizData[currentIdx].en) {
-        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent! 正解です。</span>";
+        document.getElementById('resultMsg').innerHTML = "<span style='color:green;'>Excellent!</span>";
         document.getElementById('answerArea').innerHTML = `<div class="final-sentence" id="orderPhrase">${userStr}</div>`;
         document.getElementById('wordBank').innerHTML = "";
         document.getElementById('checkBtn').style.display = "none";
         document.getElementById('nextBtn').style.display = "block";
         document.getElementById('ttsBtn').style.display = "flex";
-        document.getElementById('ttsBtn').textContent = "🔊";
     } else {
         document.getElementById('resultMsg').innerHTML = "<span style='color:red;'>Try again!</span>";
     }
 }
 
-function speak(text) {
-    const synth = window.speechSynthesis;
-    if (synth.speaking && isSpeaking) {
-        synth.cancel();
-        return;
-    }
-    synth.cancel();
-    const uttr = new SpeechSynthesisUtterance(text);
-    uttr.lang = "en-US";
-    uttr.rate = 0.8;
-    uttr.pitch = 1.0;
-    const voices = synth.getVoices();
-    const targetVoice = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name === 'Samantha') || voices[0];
-    if (targetVoice) uttr.voice = targetVoice;
-    uttr.onstart = () => { isSpeaking = true; document.getElementById('ttsBtn').textContent = "⏹️"; };
-    uttr.onend = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
-    uttr.onerror = () => { isSpeaking = false; document.getElementById('ttsBtn').textContent = "🔊"; };
-    synth.speak(uttr);
-}
-
-function speakPhrase() {
-    const phraseEl = document.getElementById('orderPhrase');
-    if (phraseEl) speak(phraseEl.innerText);
-}
-
 function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) renderQuestion();
-    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 2 Complete!</h2>";
+    else document.getElementById('game-ui').innerHTML = "<h2 style='color:#00695c;'>🎉 Part 1 Complete!</h2>";
+}
+
+function speakPhrase() {
+    const uttr = new SpeechSynthesisUtterance(document.getElementById('orderPhrase').innerText);
+    uttr.lang = "en-US";
+    uttr.rate = 0.8;
+    uttr.pitch = 1.1;
+    const voices = window.speechSynthesis.getVoices();
+    uttr.voice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English')) || voices[0];
+    window.speechSynthesis.speak(uttr);
 }
 
 function shuffle(array) {
@@ -281,5 +287,6 @@ function shuffle(array) {
 window.speechSynthesis.onvoiceschanged = () => {};
 renderQuestion();
 </script>
+
 </body>
 </html>
