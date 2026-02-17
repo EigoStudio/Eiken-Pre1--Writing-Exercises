@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eiken Pre-1st: Writing Body Exercise (Pollution)</title>
+<style>
+    :root {
+        --bg-black: #1a1a1a;
+        --azuki-red: #96514d;
+        --uguisu-green: #6b705c;
+        --text-white: #f5f5f5;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--bg-black);
+        color: var(--text-white);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 25px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.6rem; margin-bottom: 5px; color: var(--uguisu-green); border-bottom: 2px solid var(--azuki-red); display: inline-block; padding-bottom: 5px; }
+    .sub-title { font-size: 1.1rem; color: var(--azuki-red); font-weight: bold; margin-bottom: 20px; }
+    
+    .topic-box {
+        background: #2a2a2a; padding: 20px; border-radius: 15px; border-left: 5px solid var(--uguisu-green);
+        text-align: left; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6;
+    }
+    .topic-label { color: var(--uguisu-green); font-weight: bold; margin-bottom: 5px; display: block; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        background: #2a2a2a; padding: 12px 25px; border-radius: 50px; border: 1px solid var(--azuki-red); margin-bottom: 20px;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: bold; color: var(--text-white); }
+    .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--uguisu-green); }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    .tab-btn {
+        padding: 8px 25px; border-radius: 20px; border: 1.5px solid var(--uguisu-green);
+        background: transparent; color: var(--uguisu-green); cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--uguisu-green); color: white; }
+
+    .container {
+        background: #252525; max-width: 900px; width: 100%; padding: 40px; border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333;
+    }
+
+    .question-box {
+        font-size: 1.15rem; background-color: #2e2e2e; border-bottom: 3px solid var(--azuki-red);
+        padding: 25px; border-radius: 15px; margin-bottom: 25px; min-height: 70px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: #333; color: var(--text-white); border: 1.5px solid #4a4a4a;
+        padding: 15px 20px; border-radius: 15px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); transition: 0.2s;
+    }
+    .choice-btn:hover { background-color: var(--azuki-red); border-color: var(--azuki-red); }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 25px; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 120px; border: 2px dashed var(--uguisu-green); border-radius: 15px; padding: 20px;
+        margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #1a1a1a;
+    }
+
+    .answer-word {
+        background-color: var(--azuki-red); color: white;
+        padding: 8px 14px; border-radius: 10px; cursor: grab; font-size: 0.95rem; user-select: none;
+    }
+
+    .final-sentence { font-size: 1.3rem; color: var(--text-white); padding: 25px; line-height: 1.6; text-align: left; background: #333; border-radius: 15px; }
+    .action-btn { background: var(--uguisu-green); color: white; border: none; padding: 15px 60px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    .action-btn:disabled { background: #444; color: #777; }
+
+    /* Print Styles */
+    #print-area { display: none; }
+    @media print {
+        .container, header, .no-print { display: none !important; }
+        #print-area { display: block; color: black; background: white; width: 100%; font-family: var(--base-font); }
+        .print-page { page-break-after: always; padding: 30px; }
+        .print-title { font-size: 1.4rem; text-align: center; border-bottom: 2px solid #000; margin-bottom: 5px; padding-bottom: 5px; }
+        .print-sub { font-size: 1.1rem; text-align: center; color: #96514d; font-weight: bold; margin-bottom: 20px; }
+        .print-q { margin-bottom: 30px; font-size: 1.1rem; line-height: 1.8; }
+        .line { border-bottom: 1px solid black; display: inline-block; min-width: 350px; margin-left: 10px; height: 1.2em; }
+        .full-line { border-bottom: 1px solid black; width: 100%; height: 40px; margin-top: 10px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>英検準1級 ライティング対策</h1>
+    <div class="sub-title">Body: Pollution</div>
+    <div class="topic-box">
+        <span class="topic-label">【TOPIC】</span>
+        Should people who live in cities be required to use public transportation?
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch">
+                <input type="checkbox" id="audioToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <button class="tab-btn active" id="tab-vocab" onclick="switchMode('vocab')">Vocabulary</button>
+        <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Sentences</button>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 20px 0; font-size: 1.2rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">英検準1級 ライティング対策</div>
+        <div class="print-sub">Vocabulary: Pollution</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">英検準1級 ライティング対策</div>
+        <div class="print-sub">Body Practice: Pollution</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const vocabData = [
+    { jp: "公共交通機関の利用を義務付けること", en: "mandating public transport usage", choices: ["mandating public transport usage", "advocating private vehicle use", "regulating road construction", "accelerating traffic speed"] },
+    { jp: "～を抑制する", en: "curb", choices: ["curb", "boost", "create", "observe"] },
+    { jp: "和らげる（軽減する）", en: "mitigate", choices: ["mitigate", "eliminate", "simulate", "cultivate"] },
+    { jp: "劇的に減らす", en: "drastically reduce", choices: ["drastically reduce", "slightly change", "constantly keep", "gradually grow"] },
+    { jp: "劇的な減少", en: "drastic reduction", choices: ["drastic reduction", "minor change", "rapid rise", "slow decline"] },
+    { jp: "二酸化炭素排出量（炭素足跡）", en: "carbon footprint", choices: ["carbon footprint", "natural gas", "solar energy", "fossil fuels"] },
+    { jp: "炭素排出量", en: "carbon emissions", choices: ["carbon emissions", "water vapor", "oxygen levels", "heat waves"] },
+    { jp: "～だけでなく、...もまた", en: "not only ... but also", choices: ["not only ... but also", "either ... or", "neither ... nor", "as well ... as"] },
+    { jp: "～するために（目的）", en: "in order to", choices: ["in order to", "as long as", "with regard to", "owing to"] },
+    { jp: "それがひいては～につながる", en: "which in turn", choices: ["which in turn", "which in fact", "which in case", "which in short"] },
+    { jp: "大都市圏", en: "metropolitan areas", choices: ["metropolitan areas", "rural villages", "coastal lines", "mountain peaks"] },
+    { jp: "都市の移動性", en: "urban mobility", choices: ["urban mobility", "local distance", "public safety", "private space"] },
+    { jp: "地元経済を刺激する", en: "stimulate local economies", choices: ["stimulate local economies", "fix local rules", "buy local goods", "save local water"] },
+    { jp: "化石燃料への依存", en: "reliance on fossil fuels", choices: ["reliance on fossil fuels", "trust in renewable energy", "focus on organic food", "interest in fresh air"] },
+    { jp: "環境を意識した", en: "environmentally conscious", choices: ["environmentally conscious", "financially stable", "politically active", "scientifically proven"] },
+    { jp: "人口密度の高い地域", en: "densely populated zones", choices: ["densely populated zones", "small remote areas", "highly restricted spots", "quiet rural villages"] }
+];
+
+const sentenceData = [
+    { ja: "大都市圏での公共交通機関の利用を義務付けることは、炭素排出量をかなり下げるために不可欠です。", en: "Mandating public transport usage in metropolitan areas is essential to significantly lower carbon emissions." },
+    { ja: "自家用車から電気バスへ転換することで、都市部は二酸化炭素排出量を劇的に減らすことができます。", en: "By transitioning from private cars to electric buses, urban areas can drastically reduce the carbon footprint." },
+    { ja: "温暖化の加速を和らげるためには、持続可能な通勤の促進が欠かせません。", en: "In order to mitigate the accelerating effects of global warming, promoting sustainable commuting is indispensable." },
+    { ja: "化石燃料への依存を抑制するための集団的行動は、都市汚染の劇的な減少につながります。", en: "Collective action to curb reliance on fossil fuels leads to a drastic reduction in urban pollution." },
+    { ja: "公共交通機関を義務付けることは都市の移動性を高め、それが結果として地元経済を刺激します。", en: "Mandating public transport usage enhances urban mobility, which in turn stimulates local economies." }
+];
+
+let currentMode = 'vocab';
+let currentIdx = 0;
+let userSentence = [];
+let selectedWord = "";
+let isChecked = false;
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 0.85;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(uttr);
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    document.getElementById('tab-vocab').classList.toggle('active', mode === 'vocab');
+    document.getElementById('tab-reorder').classList.toggle('active', mode === 'reorder');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.disabled = true;
+    const area = document.getElementById('interactive-area');
+    area.innerHTML = "";
+
+    if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        document.getElementById('questionText').textContent = item.jp;
+        let choices = shuffleArray([...item.choices]);
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedWord = c;
+                speak(c);
+                document.querySelectorAll('.choice-btn').forEach(el => el.style.background = "#333");
+                b.style.background = "var(--azuki-red)";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else {
+        const item = sentenceData[currentIdx];
+        document.getElementById('questionText').textContent = item.ja;
+        userSentence = [];
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        ansArea.ondragover = (e) => e.preventDefault();
+        ansArea.ondrop = handleDropOnArea;
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words).forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                userSentence.push({text: w, btnId: b.id});
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj, i) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.dataset.index = i;
+        s.ondragstart = (e) => e.dataTransfer.setData("text/plain", i);
+        s.ondragover = (e) => e.preventDefault();
+        s.ondrop = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const fromIdx = parseInt(e.dataTransfer.getData("text/plain"));
+            const movedItem = userSentence.splice(fromIdx, 1)[0];
+            userSentence.splice(i, 0, movedItem);
+            renderSentence();
+        };
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence.splice(i, 1);
+            renderSentence();
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleDropOnArea(e) {
+    e.preventDefault();
+    const fromIdx = parseInt(e.dataTransfer.getData("text/plain"));
+    if (!isNaN(fromIdx)) {
+        const movedItem = userSentence.splice(fromIdx, 1)[0];
+        userSentence.push(movedItem);
+        renderSentence();
+    }
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    if (!isChecked) {
+        let correctText = currentMode === 'vocab' ? vocabData[currentIdx].en : sentenceData[currentIdx].en;
+        let isCorrect = (currentMode === 'vocab') ? (selectedWord === correctText) : (userSentence.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1") === correctText);
+        if (isCorrect) {
+            isChecked = true;
+            speak(correctText);
+            document.getElementById('resultMsg').style.color = "#81c784";
+            document.getElementById('resultMsg').textContent = "Excellent!";
+            document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            btn.textContent = "Next →";
+        } else {
+            document.getElementById('resultMsg').style.color = "#ff8a80";
+            document.getElementById('resultMsg').textContent = "Try again!";
+        }
+    } else {
+        currentIdx++;
+        const max = currentMode === 'vocab' ? vocabData.length : sentenceData.length;
+        if (currentIdx < max) loadQuestion();
+        else {
+            document.getElementById('quiz-ui').innerHTML = "<h2>Mission Complete</h2>";
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-vocab-content').innerHTML = vocabData.map((d, i) => `<div class="print-q">${i+1}. ${d.jp} <span class="line"></span></div>`).join('');
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = shuffleArray(d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== ""));
+        return `<div class="print-q"><b>${i+1}. ${d.ja}</b><br>[ ${words.join(" / ")} ]<br><div class="full-line"></div></div>`;
+    }).join('');
+}
+
+window.onload = () => { loadQuestion(); preparePrint(); };
+</script>
+</body>
+</html>
