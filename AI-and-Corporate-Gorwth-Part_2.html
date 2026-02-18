@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eiken Pre-1st: AI & Corporate Growth - Part 2 Creativity</title>
+<style>
+    :root {
+        --primary-green: #2d5a27; 
+        --soft-green: #e8f5e9;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-silver: #90a4ae;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a3318;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-green); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        background: rgba(255,255,255,0.8); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--border-gray);
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-green); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 8px; }
+    .tab-btn {
+        padding: 6px 15px; border-radius: 20px; border: 2px solid var(--primary-green);
+        background: white; color: var(--primary-green); cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-green); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;
+    }
+
+    .question-box {
+        font-size: 1rem; background-color: var(--soft-green); border-bottom: 4px solid var(--primary-green);
+        padding: 20px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; min-height: 40px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 700px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-green); color: var(--text-dark); border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 15px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: all 0.2s;
+    }
+    .choice-btn:hover { background-color: #dcedc8; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 80px; border: 2px dashed var(--accent-silver); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: var(--primary-green); border: 1.5px solid var(--primary-green);
+        padding: 8px 15px; border-radius: 10px; cursor: grab; font-size: 0.95rem; font-weight: bold;
+        user-select: none;
+    }
+
+    .final-sentence {
+        font-size: 1.3rem; color: var(--primary-green); font-weight: bold; padding: 20px;
+        line-height: 1.6; text-align: left; background: #f1f8e9; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-green); color: white; border: none; padding: 15px 40px;
+        border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    /* ----------------------------------------------------
+       PRINT AREA SETTINGS
+    ------------------------------------------------------- */
+    /* 通常時（ブラウザ）は非表示 */
+    #print-area { display: none; }
+
+    @media print {
+        /* 印刷時はブラウザ用UIをすべて隠す */
+        .container, header, .no-print, .control-panel, .action-btn { display: none !important; }
+        
+        /* 印刷時のみ表示 */
+        #print-area { 
+            display: block !important; 
+            color: black; 
+            background: white; 
+            width: 100%; 
+            font-family: var(--base-font); 
+        }
+        
+        .print-page { page-break-after: always; padding: 20px 40px; }
+        .print-title { font-size: 1.3rem; text-align: center; border-bottom: 2px solid #000; margin-bottom: 10px; padding-bottom: 5px; }
+        .print-vocab-q { margin-bottom: 8px; font-size: 0.85rem; display: flex; align-items: flex-end; }
+        .vocab-jp { width: 45%; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 45px; }
+        .print-sentence-q { margin-bottom: 22px; }
+        .sentence-ja { font-size: 1rem; font-weight: bold; margin-bottom: 2px; }
+        .sentence-choices { font-style: italic; font-size: 1rem; color: #333; }
+        .sentence-line { border-bottom: 1px solid #000; height: 30px; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>英検準1級 AI & Corporate Growth - Part 2 - Creativity</h1>
+    <div class="sub-title">Should companies rely more on AI to perform tasks currently done by humans?</div>
+    
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch">
+                <input type="checkbox" id="audioToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-vocab" onclick="switchMode('vocab')">Vocabulary</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Sentences</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.7rem;">ワークシートを印刷する（A4）</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">AI & Corporate Growth - Part2 - Creativity</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Writing Exercise (Sentence Construction)</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const vocabDataRaw = [
+    { en: "foster innovation", jp: "イノベーションを促進する" },
+    { en: "dedicate time to creative endeavors", jp: "創造的な試みに時間を捧げる" },
+    { en: "uniquely human skills", jp: "人間ならではのスキル" },
+    { en: "complex problem-solving", jp: "複雑な問題解決" },
+    { en: "emotional intelligence", jp: "感情的知性（EQ）" },
+    { en: "strategic planning", jp: "戦略的立案" },
+    { en: "out-of-the-box thinking", jp: "型にはまらない考え方" },
+    { en: "monotonous labor", jp: "単調な労働" },
+    { en: "liberate employees from routine", jp: "ルーチンワークから従業員を解放する" },
+    { en: "high-value-added tasks", jp: "付加価値の高いタスク" },
+    { en: "empathy and intuition", jp: "共感と直感" },
+    { en: "critical thinking abilities", jp: "批判的思考力" },
+    { en: "interpersonal communication", jp: "対人コミュニケーション" },
+    { en: "generate novel ideas", jp: "斬新なアイデアを生み出す" },
+    { en: "subjective judgment", jp: "主観的な判断" },
+    { en: "collaborative environment", jp: "協力的な環境" },
+    { en: "ethical considerations", jp: "倫理的な配慮" },
+    { en: "stimulate intellectual growth", jp: "知的成長を刺激する" },
+    { en: "leverage human potential", jp: "人間のポテンシャルを最大限に活用する" }
+];
+
+const sentenceData = [
+    { ja: "AIは従業員を単調な労働から解放し、創造的な試みに時間を割くことを可能にします。", en: "AI liberates employees from monotonous labor, allowing them to dedicate time to creative endeavors." },
+    { ja: "企業は、AIを活用することでイノベーションをより効果的に促進できます。", en: "Companies can foster innovation more effectively by leveraging AI." },
+    { ja: "共感や直感といった人間ならではのスキルは、AIでは代替不可能です。", en: "Uniquely human skills such as empathy and intuition are irreplaceable by AI." },
+    { ja: "単純作業を自動化することで、スタッフは複雑な問題解決に集中できます。", en: "By automating routine tasks, staff can focus on complex problem-solving." },
+    { ja: "AIがデータを処理する一方で、人間は戦略的立案において主観的な判断を下します。", en: "While AI processes data, humans make subjective judgments in strategic planning." },
+    { ja: "斬新なアイデアを生み出すには、型にはまらない考え方が不可欠です。", en: "Out-of-the-box thinking is essential for generating novel ideas." },
+    { ja: "AIは対人コミュニケーションに必要な感情的知性を欠いています。", en: "AI lacks the emotional intelligence required for interpersonal communication." },
+    { ja: "AIの導入は、従業員がより付加価値の高いタスクに従事することを促します。", en: "The introduction of AI encourages employees to engage in more high-value-added tasks." },
+    { ja: "批判的思考力は、AIが生成した情報を評価する際に重要な役割を果たします。", en: "Critical thinking abilities play a crucial role when evaluating information generated by AI." },
+    { ja: "結論として、AIは人間のポテンシャルを最大限に引き出すためのパートナーです。", en: "In conclusion, AI is a partner for maximizing human potential." }
+];
+
+let vocabData = [];
+let currentMode = 'vocab';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.getElementById('tab-vocab').classList.toggle('active', mode === 'vocab');
+    document.getElementById('tab-reorder').classList.toggle('active', mode === 'reorder');
+    loadQuestion();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(uttr);
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    area.innerHTML = "";
+
+    if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        document.getElementById('questionText').textContent = item.jp;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedWord = c;
+                document.querySelectorAll('.choice-btn').forEach(btn => btn.style.backgroundColor = "var(--soft-green)");
+                b.style.backgroundColor = "#dcedc8";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else {
+        const item = sentenceData[currentIdx];
+        document.getElementById('questionText').textContent = item.ja;
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        ansArea.addEventListener('dragover', e => e.preventDefault());
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                userSentence.push({text: w, btnId: b.id});
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+        renderSentence();
+    }
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj, i) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', i));
+        s.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const movedItem = userSentence.splice(fromIndex, 1)[0];
+            userSentence.splice(i, 0, movedItem);
+            renderSentence();
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence.splice(i, 1);
+            renderSentence();
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let correctText = currentMode === 'vocab' ? vocabData[currentIdx].en : sentenceData[currentIdx].en;
+        let isCorrect = false;
+
+        if (currentMode === 'vocab') {
+            isCorrect = (selectedWord === correctText);
+        } else {
+            let userStr = userSentence.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            speak(correctText);
+            document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            resultMsg.innerHTML = "Perfect! ✨";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = "Not quite... Try again!";
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Answer: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        const max = currentMode === 'vocab' ? vocabData.length : sentenceData.length;
+        if (currentIdx < max) loadQuestion();
+        else {
+            document.getElementById('quiz-ui').innerHTML = "<h2>Mission Accomplished!</h2><p>You are ready for the test.</p>";
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => `
+        <div class="print-vocab-q">
+            <span class="vocab-jp">${i+1}. ${d.jp}</span>
+            <div class="vocab-line"></div>
+        </div>`).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-sentence-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
