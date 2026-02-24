@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eiken Pre-1st: Writing Body Exercise (Cost)</title>
+<style>
+    :root {
+        --bg-black: #1a1a1a;
+        --azuki-red: #96514d;
+        --uguisu-green: #6b705c;
+        --text-white: #f5f5f5;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--bg-black);
+        color: var(--text-white);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 25px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.6rem; margin-bottom: 5px; color: var(--uguisu-green); border-bottom: 2px solid var(--azuki-red); display: inline-block; padding-bottom: 5px; }
+    .sub-title { font-size: 1.1rem; color: var(--azuki-red); font-weight: bold; margin-bottom: 20px; }
+    
+    .topic-box {
+        background: #2a2a2a; padding: 20px; border-radius: 15px; border-left: 5px solid var(--uguisu-green);
+        text-align: left; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6;
+    }
+    .topic-label { color: var(--uguisu-green); font-weight: bold; margin-bottom: 5px; display: block; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        background: #2a2a2a; padding: 12px 25px; border-radius: 50px; border: 1px solid var(--azuki-red); margin-bottom: 20px;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: bold; color: var(--text-white); }
+    .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--uguisu-green); }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    .tab-btn {
+        padding: 8px 25px; border-radius: 20px; border: 1.5px solid var(--uguisu-green);
+        background: transparent; color: var(--uguisu-green); cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--uguisu-green); color: white; }
+
+    .container {
+        background: #252525; max-width: 900px; width: 100%; padding: 40px; border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333;
+    }
+
+    .question-box {
+        font-size: 1.15rem; background-color: #2e2e2e; border-bottom: 3px solid var(--azuki-red);
+        padding: 25px; border-radius: 15px; margin-bottom: 25px; min-height: 70px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: #333; color: var(--text-white); border: 1.5px solid #4a4a4a;
+        padding: 15px 20px; border-radius: 15px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); transition: 0.2s;
+    }
+    .choice-btn:hover { background-color: var(--azuki-red); border-color: var(--azuki-red); }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 25px; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 120px; border: 2px dashed var(--uguisu-green); border-radius: 15px; padding: 20px;
+        margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #1a1a1a;
+    }
+
+    .answer-word {
+        background-color: var(--azuki-red); color: white;
+        padding: 8px 14px; border-radius: 10px; cursor: grab; font-size: 0.95rem; user-select: none;
+    }
+
+    .final-sentence { font-size: 1.3rem; color: var(--text-white); padding: 25px; line-height: 1.6; text-align: left; background: #333; border-radius: 15px; }
+    .action-btn { background: var(--uguisu-green); color: white; border: none; padding: 15px 60px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    .action-btn:disabled { background: #444; color: #777; }
+
+    /* Print Styles */
+    #print-area { display: none; }
+    @media print {
+        .container, header, .no-print { display: none !important; }
+        #print-area { display: block; color: black; background: white; width: 100%; font-family: var(--base-font); }
+        .print-page { page-break-after: always; padding: 30px; }
+        .print-title { font-size: 1.4rem; text-align: center; border-bottom: 2px solid #000; margin-bottom: 5px; padding-bottom: 5px; }
+        .print-sub { font-size: 1.1rem; text-align: center; color: #96514d; font-weight: bold; margin-bottom: 20px; }
+        .print-q { margin-bottom: 30px; font-size: 1.1rem; line-height: 1.8; }
+        .line { border-bottom: 1px solid black; display: inline-block; min-width: 350px; margin-left: 10px; height: 1.2em; }
+        .full-line { border-bottom: 1px solid black; width: 100%; height: 40px; margin-top: 10px; }
+        .trivia-container { margin-top: 20px; border: 2px solid var(--uguisu-green); border-radius: 10px; padding: 20px; }
+        .trivia-item { margin-bottom: 15px; }
+        .trivia-term { font-weight: bold; color: var(--azuki-red); font-size: 1.1rem; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>英検準1級 ライティング対策</h1>
+    <div class="sub-title">Body Focus: Cost</div>
+    <div class="topic-box">
+        <span class="topic-label">【TOPIC】</span>
+        Should people who live in cities be required to use public transportation?
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch">
+                <input type="checkbox" id="audioToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <button class="tab-btn active" id="tab-vocab" onclick="switchMode('vocab')">Vocabulary</button>
+        <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Sentences</button>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 20px 0; font-size: 1.2rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">英検準1級 ライティング対策</div>
+        <div class="print-sub">Vocabulary: Cost</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">英検準1級 ライティング対策</div>
+        <div class="print-sub">Body Practice: Cost</div>
+        <div id="print-sentence-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Appendix: Writing Tips & Trivia</div>
+        <div class="trivia-container">
+            <div class="trivia-item">
+                <div class="trivia-term">1. In favor of (〜を支持して / 〜の代わりに)</div>
+                <p>何かを選び、別の何かを捨てる（支持する）ときに使います。英検準1級レベルで「〜よりも〜を優先する」と言いたいときに非常に便利な表現です。</p>
+            </div>
+            <div class="trivia-item">
+                <div class="trivia-term">2. Transportation fares (交通運賃)</div>
+                <p>バスや電車の料金のこと。単に fares とも言いますが、ライティングでは対象をはっきりさせるために transportation を添えるのが一般的です。</p>
+            </div>
+            <div class="trivia-item">
+                <div class="trivia-term">3. Infrastructure (インフラ)</div>
+                <p>道路、鉄道、水道など、社会の基盤設備。コストの議論では、政府の支出先（government spending）としてよく登場します。</p>
+            </div>
+            <div class="trivia-item">
+                <div class="trivia-term">4. Long run (長期的には)</div>
+                <p>今はコストが高くても、将来的にプラスになることを説明する際に "in the long run" と添えると、論理的な深みが出ます。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const vocabData = [
+    { jp: "費用対効果の観点から", en: "from a cost-effective perspective", choices: ["from a cost-effective perspective", "at the cost of time", "with a small budget", "at an expensive rate"] },
+    { jp: "交通運賃", en: "transportation fares", choices: ["transportation fares", "private car taxes", "utility bills", "parking fees"] },
+    { jp: "家計への経済的負担", en: "financial burden on households", choices: ["financial burden on households", "economic growth in cities", "personal saving goals", "social welfare programs"] },
+    { jp: "補助金を与える", en: "subsidize", choices: ["subsidize", "tax", "charge", "refund"] },
+    { jp: "自家用車を手放す", en: "giving up private cars", choices: ["giving up private cars", "buying new vehicles", "renting parking spaces", "washing cars"] },
+    { jp: "インフラを維持・整備する", en: "maintain infrastructure", choices: ["maintain infrastructure", "destroy buildings", "build local parks", "clean the streets"] },
+    { jp: "初期費用", en: "initial costs", choices: ["initial costs", "monthly payments", "annual income", "fixed taxes"] },
+    { jp: "長期的には", en: "in the long run", choices: ["in the long run", "at the moment", "by and large", "temporarily"] },
+    { jp: "経済的な利点", en: "economic advantages", choices: ["economic advantages", "social problems", "environmental risks", "political issues"] },
+    { jp: "多額のお金を節約する", en: "save a large amount of money", choices: ["save a large amount of money", "spend a little cash", "borrow from the bank", "invest in stocks"] },
+    { jp: "～を正当化する", en: "justify", choices: ["justify", "refuse", "avoid", "criticize"] },
+    { jp: "大幅なコスト削減", en: "significant cost reduction", choices: ["significant cost reduction", "minor budget change", "sudden price hike", "slow inflation"] },
+    { jp: "財源を確保する", en: "secure financial resources", choices: ["secure financial resources", "waste public funds", "increase debt", "borrow money"] },
+    { jp: "手頃な価格の交通手段", en: "affordable transportation", choices: ["affordable transportation", "luxury cars", "private jets", "expensive taxis"] },
+    { jp: "～に多額を費やす", en: "spend a fortune on", choices: ["spend a fortune on", "save a little on", "invest nothing in", "borrow for"] },
+    { jp: "経済を刺激する", en: "stimulate the economy", choices: ["stimulate the economy", "stabilize the market", "fix the prices", "control the budget"] }
+];
+
+const sentenceData = [
+    { ja: "費用対効果の観点から、公共交通機関は自家用車を所有するよりも経済的です。", en: "From a cost-effective perspective, public transport is more economical than owning a private car." },
+    { ja: "政府は家計の負担を減らすために、交通運賃を補助すべきです。", en: "The government should subsidize transportation fares in order to reduce the financial burden on households." },
+    { ja: "インフラ整備には高い初期費用がかかりますが、長期的には多くの利点があります。", en: "Maintaining infrastructure requires high initial costs, but it has many advantages in the long run." },
+    { ja: "自家用車を手放して公共交通機関を利用することは、個人が多額のお金を節約するのに役立ちます。", en: "Giving up private cars in favor of public transport helps individuals save a large amount of money." },
+    { ja: "効率的な交通システムの整備は、地元経済を刺激するのに役立ちます。", en: "Developing efficient transportation systems helps to stimulate the local economy." }
+];
+
+let currentMode = 'vocab';
+let currentIdx = 0;
+let userSentence = [];
+let selectedWord = "";
+let isChecked = false;
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 0.85;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(uttr);
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    document.getElementById('tab-vocab').classList.toggle('active', mode === 'vocab');
+    document.getElementById('tab-reorder').classList.toggle('active', mode === 'reorder');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.disabled = true;
+    const area = document.getElementById('interactive-area');
+    area.innerHTML = "";
+
+    if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        document.getElementById('questionText').textContent = item.jp;
+        let choices = shuffleArray([...item.choices]);
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedWord = c;
+                speak(c);
+                document.querySelectorAll('.choice-btn').forEach(el => el.style.background = "#333");
+                b.style.background = "var(--azuki-red)";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else {
+        const item = sentenceData[currentIdx];
+        document.getElementById('questionText').textContent = item.ja;
+        userSentence = [];
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        ansArea.ondragover = (e) => e.preventDefault();
+        ansArea.ondrop = handleDropOnArea;
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words).forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                userSentence.push({text: w, btnId: b.id});
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj, i) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.dataset.index = i;
+        s.ondragstart = (e) => e.dataTransfer.setData("text/plain", i);
+        s.ondragover = (e) => e.preventDefault();
+        s.ondrop = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const fromIdx = parseInt(e.dataTransfer.getData("text/plain"));
+            const movedItem = userSentence.splice(fromIdx, 1)[0];
+            userSentence.splice(i, 0, movedItem);
+            renderSentence();
+        };
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence.splice(i, 1);
+            renderSentence();
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleDropOnArea(e) {
+    e.preventDefault();
+    const fromIdx = parseInt(e.dataTransfer.getData("text/plain"));
+    if (!isNaN(fromIdx)) {
+        const movedItem = userSentence.splice(fromIdx, 1)[0];
+        userSentence.push(movedItem);
+        renderSentence();
+    }
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    if (!isChecked) {
+        let correctText = currentMode === 'vocab' ? vocabData[currentIdx].en : sentenceData[currentIdx].en;
+        let isCorrect = (currentMode === 'vocab') ? (selectedWord === correctText) : (userSentence.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1") === correctText);
+        if (isCorrect) {
+            isChecked = true;
+            speak(correctText);
+            document.getElementById('resultMsg').style.color = "#81c784";
+            document.getElementById('resultMsg').textContent = "Excellent!";
+            document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            btn.textContent = "Next →";
+        } else {
+            document.getElementById('resultMsg').style.color = "#ff8a80";
+            document.getElementById('resultMsg').textContent = "Try again!";
+        }
+    } else {
+        currentIdx++;
+        const max = currentMode === 'vocab' ? vocabData.length : sentenceData.length;
+        if (currentIdx < max) loadQuestion();
+        else {
+            document.getElementById('quiz-ui').innerHTML = "<h2>Mission Complete</h2>";
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-vocab-content').innerHTML = vocabData.map((d, i) => `<div class="print-q">${i+1}. ${d.jp} <span class="line"></span></div>`).join('');
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = shuffleArray(d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== ""));
+        return `<div class="print-q"><b>${i+1}. ${d.ja}</b><br>[ ${words.join(" / ")} ]<br><div class="full-line"></div></div>`;
+    }).join('');
+}
+
+window.onload = () => { loadQuestion(); preparePrint(); };
+</script>
+</body>
+</html>
