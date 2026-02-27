@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eiken Pre-1st: Digital Textbooks - Part 3 (Physical Burden)</title>
+<style>
+    :root {
+        --primary-indigo: #1a237e; 
+        --soft-indigo: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #121212;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-indigo); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        background: rgba(255,255,255,0.8); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--border-gray);
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-indigo); }
+
+    .tabs { display: flex; gap: 8px; }
+    .tab-btn {
+        padding: 6px 15px; border-radius: 20px; border: 2px solid var(--primary-indigo);
+        background: white; color: var(--primary-indigo); cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-indigo); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;
+    }
+
+    .question-box {
+        font-size: 1rem; background-color: var(--soft-indigo); border-bottom: 4px solid var(--primary-indigo);
+        padding: 20px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; min-height: 40px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 700px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-indigo); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 15px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: all 0.2s;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 80px; border: 2px dashed var(--primary-indigo); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #000; border: 1.5px solid var(--primary-indigo);
+        padding: 8px 15px; border-radius: 10px; cursor: grab; font-size: 0.95rem; font-weight: bold;
+    }
+
+    .final-sentence {
+        font-size: 1.3rem; color: var(--primary-indigo); font-weight: bold; padding: 20px;
+        line-height: 1.6; text-align: left; background: #e8eaf6; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-indigo); color: white; border: none; padding: 15px 40px;
+        border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    @media print {
+        .container, header, .no-print, .control-panel, .action-btn { display: none !important; }
+        #print-area { display: block !important; color: black; background: white; width: 100%; font-family: var(--base-font); }
+        .print-page { page-break-after: always; padding: 20px 40px; }
+        .print-title { font-size: 1.3rem; text-align: center; border-bottom: 2px solid #000; margin-bottom: 10px; padding-bottom: 5px; }
+        .print-vocab-q { margin-bottom: 8px; font-size: 0.85rem; display: flex; align-items: flex-end; }
+        .vocab-jp { width: 45%; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 45px; }
+        .print-sentence-q { margin-bottom: 22px; }
+        .sentence-ja { font-size: 1rem; font-weight: bold; margin-bottom: 2px; }
+        .sentence-choices { font-style: italic; font-size: 1rem; color: #333; }
+        .sentence-line { border-bottom: 1px solid #000; height: 30px; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>英検準1級 Digital Textbooks - Part 3</h1>
+    <div class="sub-title">Should Schools replace all textbooks with e-books? (Focus: Physical Burden)</div>
+    
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch">
+                <input type="checkbox" id="audioToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-vocab" onclick="switchMode('vocab')">Vocabulary</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Sentences</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.7rem;">ワークシートを印刷する（A4）</button>
+</div>
+
+<div id="print-area" style="display:none;">
+    <div class="print-page">
+        <div class="print-title">Vocabulary Exercise: Physical Burden</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Sentence Construction: Physical Burden</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const vocabDataRaw = [
+    { en: "alleviate physical strain", jp: "身体的負担を和らげる" },
+    { en: "excessive weight of textbooks", jp: "教科書の過度な重さ" },
+    { en: "prevent chronic back pain", jp: "慢性的は腰痛を防ぐ" },
+    { en: "enhance portability", jp: "携帯性を高める" },
+    { en: "cumbersome", jp: "（重くて）扱いづらい、厄介な" },
+    { en: "multiple heavy books", jp: "何冊もの重い本" },
+    { en: "visual fatigue", jp: "視覚疲労（疲れ目）" },
+    { en: "the use of blue-light filters", jp: "ブルーライトフィルターの使用" },
+    { en: "address health concerns", jp: "健康上の懸念に対処する" },
+    { en: "posture-related issues", jp: "姿勢に関する問題" },
+    { en: "compact digital devices", jp: "小型のデジタル機器" },
+    { en: "physical well-being", jp: "身体的な健康状態" }
+];
+
+const sentenceData = [
+    { ja: "デジタル教科書は、生徒の身体的負担を和らげるのに役立ちます。", en: "Digital textbooks help to alleviate the physical strain on students." },
+    { ja: "重い教科書を持ち歩くことは、慢性的な腰痛の原因になりかねません。", en: "Carrying heavy textbooks can lead to chronic back pain." },
+    { ja: "タブレット型端末の携帯性は、従来の紙の本よりはるかに優れています。", en: "The portability of tablet devices is far superior to traditional paper books." },
+    { ja: "最新の画面は視覚疲労を最小限に抑えるように設計されています。", en: "Modern screens are designed to minimize visual fatigue." },
+    { ja: "ブルーライトフィルターの使用は、視力に関する懸念を和らげるのに役立ちます。", en: "The use of blue-light filters helps mitigate concerns regarding eyesight." },
+    { ja: "生徒の身体的健康を考慮すると、軽量な電子書籍の使用は正当であると言えます。", en: "Considering students' physical well-being, the use of lightweight e-books is justified." }
+];
+
+let vocabData = [];
+let currentMode = 'vocab';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedWord = "";
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.getElementById('tab-vocab').classList.toggle('active', mode === 'vocab');
+    document.getElementById('tab-reorder').classList.toggle('active', mode === 'reorder');
+    loadQuestion();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 0.8; 
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google US English") || v.name.includes("Samantha") || v.name.includes("Female")));
+    if (femaleVoice) uttr.voice = femaleVoice;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(uttr);
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.disabled = true;
+    const area = document.getElementById('interactive-area');
+    area.innerHTML = "";
+
+    if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        document.getElementById('questionText').textContent = item.jp;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedWord = c;
+                document.querySelectorAll('.choice-btn').forEach(btn => btn.style.backgroundColor = "var(--soft-indigo)");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else {
+        const item = sentenceData[currentIdx];
+        document.getElementById('questionText').textContent = item.ja;
+        userSentence = [];
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        ansArea.addEventListener('dragover', e => e.preventDefault());
+        area.appendChild(ansArea);
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                userSentence.push({text: w, btnId: b.id});
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+        renderSentence();
+    }
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj, i) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', i));
+        s.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const movedItem = userSentence.splice(fromIndex, 1)[0];
+            userSentence.splice(i, 0, movedItem);
+            renderSentence();
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence.splice(i, 1);
+            renderSentence();
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+    if (!isChecked) {
+        let correctText = currentMode === 'vocab' ? vocabData[currentIdx].en : sentenceData[currentIdx].en;
+        let isCorrect = false;
+        if (currentMode === 'vocab') {
+            isCorrect = (selectedWord === correctText);
+        } else {
+            let userStr = userSentence.map(o => o.text).join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+        if (isCorrect) {
+            isChecked = true;
+            speak(correctText);
+            document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            resultMsg.innerHTML = "Perfect! ✨";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = "Not quite... Try again!";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Model Answer: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        const max = currentMode === 'vocab' ? vocabData.length : sentenceData.length;
+        if (currentIdx < max) loadQuestion();
+        else {
+            document.getElementById('quiz-ui').innerHTML = "<h2>Mission Accomplished!</h2><p>You have mastered the 'Physical Burden' point.</p>";
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => `
+        <div class="print-vocab-q">
+            <span class="vocab-jp">${i+1}. ${d.jp}</span>
+            <div class="vocab-line"></div>
+        </div>`).join('');
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-sentence-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+    window.speechSynthesis.getVoices();
+};
+</script>
+</body>
+</html>
