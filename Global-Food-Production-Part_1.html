@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing "Global Food Production" Land space / Technology</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        background: rgba(255,255,255,0.8); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--border-gray);
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 8px; }
+    .tab-btn {
+        padding: 6px 15px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;
+    }
+
+    .question-box {
+        font-size: 1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 20px; border-radius: 15px; margin-bottom: 10px; font-weight: bold; min-height: 40px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .grammar-hint {
+        font-size: 0.8rem; color: var(--accent-teal); margin-bottom: 15px; font-weight: bold;
+        background: #e0f2f1; padding: 5px 15px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 700px; margin: 0 auto; }
+    
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 15px; cursor: pointer; font-size: 0.9rem; font-family: var(--base-font); font-weight: bold; transition: all 0.2s;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 80px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #000; border: 1.5px solid var(--primary-blue);
+        padding: 8px 15px; border-radius: 10px; cursor: grab; font-size: 0.9rem; font-weight: bold;
+        user-select: none;
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.5; }
+
+    .final-sentence {
+        font-size: 1.2rem; color: var(--primary-blue); font-weight: bold; padding: 20px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 15px 40px;
+        border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    /* 印刷用エリアの設定 */
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { 
+            display: block !important; 
+            color: black; 
+            background: white; 
+            width: 100%; 
+            font-family: var(--base-font); 
+        }
+        .print-page { page-break-after: always; padding: 5px 10px; }
+        .print-title { font-size: 1.1rem; text-align: center; border-bottom: 1.5px solid #000; margin-bottom: 5px; padding-bottom: 5px; font-weight: bold; }
+        .print-subtitle { font-size: 0.85rem; text-align: center; margin-bottom: 15px; line-height: 1.4; }
+        .print-vocab-q { margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: flex-end; }
+        .vocab-jp { width: 45%; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 40px; }
+        .print-sentence-q { margin-bottom: 12px; }
+        .sentence-ja { font-size: 0.8rem; font-weight: bold; margin-bottom: 1.5px; }
+        .sentence-hint { font-size: 0.70rem; color: #444; margin-bottom: 1.5px; font-style: italic; }
+        .sentence-choices { font-style: italic; font-size: 0.75rem; color: #333; }
+        .sentence-line { border-bottom: 1px solid #000; height: 30px; margin-top: 4px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Pre-1 Writing "Global Food Production"</h1>
+    <div class="sub-title">Topic: Should governments work together to increase global food production?<br>Points: Land space / Technology (Affirmative)</div>
+    
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch">
+                <input type="checkbox" id="audioToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-vocab" onclick="switchMode('vocab')">Vocabulary</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Sentences</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.7rem;">ワークシートを印刷する（A4）</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Pre-1 Writing "Global Food Production" (Useful Expressions)</div>
+        <div class="print-subtitle">
+            <b>Topic:</b> Should governments work together to increase global food production?<br>
+            <b>Points:</b> Land space / Technology
+        </div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Eiken Pre-1 Writing: Global Food Production (Structures)</div>
+        <div class="print-subtitle">
+            <b>Topic:</b> Should governments work together to increase global food production?<br>
+            <b>Points:</b> Land space / Technology
+        </div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const vocabDataRaw = [
+    { en: "agricultural technology", jp: "農業技術" },
+    { en: "increase harvest yields", jp: "収穫量を増やす" },
+    { en: "technical expertise", jp: "技術的な専門知識" },
+    { en: "maximize land productivity", jp: "土地の生産性を最大化する" },
+    { en: "optimize land usage", jp: "土地利用を最適化する" },
+    { en: "genetically modified crops", jp: "遺伝子組み換え作物" },
+    { en: "cross-border cooperation", jp: "国境を越えた協力" },
+    { en: "limited arable land", jp: "限られた耕作地" },
+    { en: "alleviate hunger", jp: "飢餓を緩和する" },
+    { en: "sustainable farming methods", jp: "持続可能な農業手法" },
+    { en: "stable food supply", jp: "安定した食料供給" },
+    { en: "global food insecurity", jp: "世界的な食料不安" },
+    { en: "technology transfer", jp: "技術移転" },
+    { en: "vertical farming", jp: "垂直農業（限られた土地の活用）" },
+    { en: "drought-resistant variants", jp: "乾燥に強い変種（作物品種）" },
+    { en: "efficient resource allocation", jp: "効率的な資源配分" },
+    { en: "foster international ties", jp: "国際的な絆を育む" },
+    { en: "precision agriculture", jp: "精密農業（ITを活用した農業）" }
+];
+
+const sentenceData = [
+    { ja: "政府は、世界的な食料不足を解決するために協力して取り組むべきです。", en: "Governments should work together to solve the global food shortage.", hint: "work together to do (〜するために協力する)" },
+    { ja: "先進国は、収穫量を増やすための最新の農業技術を共有できます。", en: "Developed nations can share the latest agricultural technology to increase harvest yields.", hint: "助動詞 can + 動詞の原形" },
+    { ja: "技術的な専門知識を共有することは、発展途上国が食料自給率を高めるのを助けます。", en: "Sharing technical expertise helps developing countries improve their food self-sufficiency.", hint: "動名詞主語 (~ing) + help + 人 + 原形" },
+    { ja: "限られた耕作地を考慮すると、土地利用を最適化することが不可欠です。", en: "Considering the limited arable land, it is essential to optimize land usage.", hint: "Considering ~ (〜を考慮すると) / 形式主語 It" },
+    { ja: "国境を越えた協力によって、私たちは農業に不向きな土地を有効活用できます。", en: "Through cross-border cooperation, we can make effective use of land unsuitable for farming.", hint: "make effective use of ~ / 後置修飾 (land unsuitable for...)" },
+    { ja: "垂直農業のような技術は、限られたスペースでより多くの食料を生産することを可能にします。", en: "Technologies like vertical farming enable us to produce more food in limited spaces.", hint: "enable + 人 + to do (人が〜することを可能にする)" },
+    { ja: "政府が共同で研究に投資することは、持続可能な農業にとって非常に重要です。", en: "Joint government investment in research is crucial for sustainable agriculture.", hint: "主語 (Investment) + is + 形容詞 (crucial)" },
+    { ja: "一国だけで世界的な飢餓の問題に対処することはほぼ不可能です。", en: "It is almost impossible for a single nation to address the global hunger problem.", hint: "It is ... for (意味上の主語) to ~" },
+    { ja: "効率的な技術の移転は、気候変動による食料不足を緩和できます。", en: "The efficient transfer of technology can alleviate food shortages caused by climate change.", hint: "alleviate (〜を緩和する) / 過去分詞修飾 (caused by...)" },
+    { ja: "協力することで、各国は土地と技術の両方を最大限に活用できるようになります。", en: "By collaborating, countries can maximize the potential of both land and technology.", hint: "By ~ing (〜することで) / both A and B" }
+];
+
+let currentMode = 'vocab';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedWord = "";
+let vocabData = [];
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.getElementById('tab-vocab').classList.toggle('active', mode === 'vocab');
+    document.getElementById('tab-reorder').classList.toggle('active', mode === 'reorder');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    area.innerHTML = "";
+
+    if (currentMode === 'vocab') {
+        hintBox.style.display = "none";
+        const item = vocabData[currentIdx];
+        document.getElementById('questionText').textContent = item.jp;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedWord = c;
+                document.querySelectorAll('.choice-btn').forEach(btn => btn.style.backgroundColor = "var(--soft-blue)");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else {
+        const item = sentenceData[currentIdx];
+        document.getElementById('questionText').textContent = item.ja;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                userSentence.push({text: w, btnId: b.id});
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj, i) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')];
+            userSentence = currentDOMWords.map(el => userSentence.find(u => u.text === el.textContent));
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let correctText = currentMode === 'vocab' ? vocabData[currentIdx].en : sentenceData[currentIdx].en;
+        let isCorrect = false;
+
+        if (currentMode === 'vocab') {
+            isCorrect = (selectedWord === correctText);
+        } else {
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            speak(correctText);
+            document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            
+            if (currentMode === 'vocab') {
+                const vocabEncourages = [
+                    "Perfect! These terms will boost your score! 💪",
+                    "Nice! This technical term will impress the examiner! 🚀"
+                ];
+                resultMsg.innerHTML = vocabEncourages[Math.floor(Math.random() * vocabEncourages.length)];
+            } else {
+                const sentenceEncourages = [
+                    "Great job! That's a powerful structure for your essay! ✍️",
+                    "Excellent! This logic is clear and professional! ✨"
+                ];
+                resultMsg.innerHTML = sentenceEncourages[Math.floor(Math.random() * sentenceEncourages.length)];
+            }
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Not quite! Let's try again. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Answer: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        const max = currentMode === 'vocab' ? vocabData.length : sentenceData.length;
+        if (currentIdx < max) loadQuestion();
+        else {
+            const finishedItem = currentMode === 'vocab' ? 'key phrases' : 'advanced structures';
+            document.getElementById('quiz-ui').innerHTML = `<h2>Mission Accomplished!</h2><p>You've mastered the ${finishedItem} for Global Food Production. Good luck with your Pre-1 exam!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => `
+        <div class="print-vocab-q">
+            <span class="vocab-jp">${i+1}. ${d.jp}</span>
+            <div class="vocab-line"></div>
+        </div>`).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-sentence-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-hint">Hint: ${d.hint}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
