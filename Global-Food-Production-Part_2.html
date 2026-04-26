@@ -181,37 +181,51 @@
 
 <script>
 const vocabDataRaw = [
-    { en: "rapid population growth", jp: "急速な人口増加" },
-    { en: "soaring food demand", jp: "急増する食料需要" },
-    { en: "environmental pollution", jp: "環境汚染" },
-    { en: "excessive use of fertilizers", jp: "肥料の過剰使用" },
-    { en: "soil degradation", jp: "土壌劣化" },
-    { en: "water contamination", jp: "水質汚染" },
-    { en: "sustainable agriculture", jp: "持続可能な農業" },
-    { en: "precision agriculture", jp: "精密農業（ITを活用した農業）" },
-    { en: "minimize environmental impact", jp: "環境への影響を最小限にする" },
-    { en: "explosive increase", jp: "爆発的な増加" },
-    { en: "global cooperation", jp: "世界的な協力" },
-    { en: "resource scarcity", jp: "資源の不足" },
-    { en: "chemical pesticides", jp: "化学農薬" },
-    { en: "food insecurity", jp: "食料不安" },
-    { en: "mitigate climate change", jp: "気候変動を緩和する" },
-    { en: "efficient resource allocation", jp: "効率的な資源配分" },
-    { en: "sharing best practices", jp: "最良の事例を共有する" },
-    { en: "address the crisis", jp: "危機に対処する" }
+    // Population / Land 関連
+    { en: "arable land remains limited", jp: "耕作可能な土地は限られたままである" },
+    { en: "meet rising food demands", jp: "高まる食料需要を満たす" },
+    { en: "drive food insecurity to a critical level", jp: "食料不安を危機的なレベルまで押し上げる" },
+    { en: "maximize land productivity", jp: "土地の生産性を最大限に高める" },
+    
+    // Pollution / Technology 関連
+    { en: "adopt innovative agricultural solutions", jp: "革新的な農業ソリューションを採用する" },
+    { en: "optimize resource allocation", jp: "資源配分を最適化する" },
+    { en: "avoid the overuse of chemical fertilizers", jp: "化学肥料の過剰使用を避ける" },
+    { en: "mitigate environmental degradation", jp: "環境悪化を緩和する" },
+{ en: "rapid population growth", jp: "急速な人口増加" },
+{ en: "excessive use of chemical pesticides", jp: "化学農薬の過剰な使用" },
+{ en: "cause serious food shortages", jp: "深刻な食糧不足を招く" },
+{ en: "straining global resources", jp: "世界の資源を圧迫する" },
+    
+    // Global Cooperation / Intro & Conclusion 関連
+    { en: "facilitate technology transfer", jp: "技術移転を促進する" },
+    { en: "ensure a stable food supply", jp: "安定した食料供給を確保する" },
+    { en: "cross-border joint investment", jp: "国境を越えた共同投資" },
+    { en: "address the global food crisis", jp: "世界的な食料危機に対処する" },
+    { en: "for the reasons mentioned above", jp: "上記の理由により（結論の定型句）" },
+    { en: "play a crucial role in", jp: "〜において極めて重要な役割を果たす" }
 ];
 
 const sentenceData = [
-    { ja: "急速な人口増加を考えると、一国で食料危機に対処するのは困難です。", en: "Considering the rapid population growth, it is difficult for a single nation to address the food crisis.", hint: "Considering ~ / It is ... for A to do" },
-    { ja: "政府は、急増する食料需要を満たすために協力しなければなりません。", en: "Governments must collaborate to meet the soaring food demand.", hint: "collaborate to meet ~ (需要を満たすために協力する)" },
-    { ja: "精密農業を導入することで、肥料による環境汚染を減らすことができます。", en: "By adopting precision agriculture, we can reduce environmental pollution caused by fertilizers.", hint: "By ~ing / pollution caused by ~ (過去分詞による修飾)" },
-    { ja: "先進技術の共有は、農薬の過剰使用を防ぐのに役立ちます。", en: "Sharing advanced technologies helps prevent the excessive use of pesticides.", hint: "Sharing ~ (動名詞主語) / help + 原形" },
-    { ja: "国際協力は、より持続可能な農業手法を確立するために不可欠です。", en: "International cooperation is essential to establish more sustainable farming methods.", hint: "essential to do (〜するために不可欠)" },
-    { ja: "爆発的な人口増加は、世界規模での深刻な食料不安を招く恐れがあります。", en: "Explosive population growth may lead to serious global food insecurity.", hint: "lead to ~ (〜につながる・〜を招く)" },
-    { ja: "ITを活用した農業は、資源の効率的な配分を可能にします。", en: "IT-based agriculture enables the efficient allocation of resources.", hint: "enable ~ (〜を可能にする)" },
-    { ja: "政府が共同で取り組むことで、農業による水質汚染を最小限に抑えられます。", en: "By working together, governments can minimize water contamination from farming.", hint: "By working together (協力することで)" },
-    { ja: "食料生産を増やす一方で、私たちは環境への影響も考慮しなければなりません。", en: "While increasing food production, we must also consider the environmental impact.", hint: "While ~ing (〜する一方で)" },
-    { ja: "最良の事例を共有することが、世界中の土壌劣化を防ぐ鍵となります。", en: "Sharing best practices is the key to preventing soil degradation worldwide.", hint: "Sharing ~ (主語) / the key to ~ing (〜するための鍵)" }
+    // Introduction / General
+    { ja: "世界人口が増え続ける一方で、耕作可能な土地は限られています。", en: "While the global population continues to grow, arable land remains limited.", hint: "While ~ / remains + 形容詞" },
+    
+    // Body 1: Population
+    { ja: "急速な人口増加は、食料不安を危機的なレベルまで押し上げています。", en: "Rapid population growth is driving food insecurity to a critical level.", hint: "drive A to B (AをBの状態にする)" },
+    { ja: "高まる食料需要を満たすために、各国政府は協力しなければなりません。", en: "Governments must work together to meet rising food demands.", hint: "work together to do / meet the demand" },
+    
+    // Body 2: Pollution / Technology
+    { ja: "精密農業のような革新的な解決策を採用することは極めて重要です。", en: "It is crucial to adopt innovative solutions such as precision agriculture.", hint: "It is crucial to do / such as ~" },
+    { ja: "この手法は資源配分を最適化し、肥料の過剰使用を避けるのに役立ちます。", en: "This method helps optimize resource allocation and avoid the overuse of fertilizers.", hint: "help (to) do / optimize and avoid (並列)" },
+    
+    // Global Cooperation (Logic Bridge)
+    { ja: "発展途上国は、しばしばこれらの高度な技術を利用することができません。", en: "Developing countries often lack access to these advanced technologies.", hint: "lack access to ~ (〜を利用できない・欠いている)" },
+    { ja: "安定した食料供給を確保するためには、国際協力が不可欠です。", en: "International cooperation is essential to ensure a stable food supply.", hint: "essential to ensure ~" },
+    
+    // Conclusion / Synthesis
+    { ja: "技術移転を促進することは、世界規模で生産性を高める鍵となります。", en: "Facilitating technology transfer is the key to increasing productivity worldwide.", hint: "Facilitating ~ (動名詞主語) / the key to ~ing" },
+    { ja: "結論として、政府は食料危機に対処するために共同で投資すべきです。", en: "In conclusion, governments should jointly invest to address the food crisis.", hint: "In conclusion / jointly invest (共同で投資する)" },
+    { ja: "上記の理由により、食料生産を増やすための国際的な取り組みを支持します。", en: "For the reasons mentioned above, I support international efforts to increase food production.", hint: "For the reasons mentioned above / efforts to do" }
 ];
 
 let currentMode = 'vocab';
