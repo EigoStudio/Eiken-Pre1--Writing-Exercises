@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Useful Expressions for Writing Convincing Essays</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body { font-family: var(--base-font); background-color: var(--silver-gray); color: var(--text-dark); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 700px; }
+    h1 { color: var(--primary-blue); font-size: 1.4rem; margin-bottom: 5px; }
+    .sub-title { font-size: 0.8rem; color: #555; }
+
+    .container { background: white; max-width: 700px; width: 100%; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; position: relative; }
+
+    .progress-bar { font-size: 0.8rem; color: #888; margin-bottom: 15px; }
+    .part-label { display: inline-block; background: var(--primary-blue); color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.75rem; margin-bottom: 10px; }
+
+    .question-box { font-size: 1.1rem; min-height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; padding: 0 10px; line-height: 1.5; font-weight: bold; }
+    .jp-hint { display: block; font-size: 0.9rem; color: #666; margin-bottom: 20px; font-weight: normal; }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .choice-btn { background-color: var(--soft-blue); border: 1px solid var(--border-gray); padding: 15px; border-radius: 15px; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: 0.2s; }
+    .choice-btn:hover { background-color: #d1d9ff; }
+    .choice-btn.correct { background-color: var(--correct-green) !important; color: white; }
+    .choice-btn.wrong { background-color: var(--wrong-red) !important; color: white; }
+
+    .action-btn { background: var(--primary-blue); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 25px; display: none; }
+
+    /* 印刷用設定 */
+    #print-area { display: none; }
+
+    @media print {
+        body { background: white; padding: 0; }
+        .no-print { display: none !important; }
+        #print-area { display: block !important; width: 100%; }
+        .print-page { padding: 20px; font-size: 0.9rem; }
+        .print-header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; font-weight: bold; font-size: 1.2rem; }
+        
+        /* 枠を文字幅に合わせる */
+        .print-section-title { 
+            display: inline-block; /* 幅をテキストに合わせる */
+            background: #f0f0f0; 
+            padding: 4px 15px; 
+            font-weight: bold; 
+            margin: 25px 0 10px 0; 
+            border: 1px solid #000; 
+            border-radius: 4px;
+        }
+        
+        .print-item { 
+            border-bottom: 1px dashed #ccc; 
+            padding: 15px 0; /* 行間を広げる */
+            display: flex; 
+            flex-direction: column; 
+            page-break-inside: avoid;
+        }
+        
+        .print-jp { font-weight: bold; font-size: 0.8rem; color: #333; margin-bottom: 8px; }
+        .print-en { font-size: 1rem; letter-spacing: 0.05rem; line-height: 1.8; }
+        
+        /* 空欄を1.5倍に広げる */
+        .blank { 
+            display: inline-block; 
+            border-bottom: 1px solid #000; 
+            min-width: 250px; /* 1.5倍以上に拡張 */
+            height: 1.2rem; 
+            margin: 0 5px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Useful Expressions for Writing Convincing Essays</h1>
+    <div class="sub-title">20 Universal Phrases for Pre-1 Writing</div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="progress-bar" id="progress">Question 1 / 20</div>
+        <div class="part-label" id="partLabel">Introduction</div>
+        <div class="jp-hint" id="jpText"></div>
+        <div class="question-box" id="enText"></div>
+        <div class="choices-grid" id="choicesArea"></div>
+        <button class="action-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+    </div>
+</div>
+
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()" style="background: var(--primary-blue); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold;">
+        ワークシートを印刷する
+    </button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-header">Useful Expressions for Writing Convincing Essays</div>
+        <div id="print-content"></div>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    { part: "Introduction", ja: "[トピック]は現代社会において重要な問題です。", en: "[Topic] is ___ in modern society.", correct: "an important issue", d1: "a good thing", d2: "an easy task", d3: "a common talk" },
+    { part: "Introduction", ja: "[トピック]に関しては、考慮すべきいくつかの要素があります。", en: "___ regarding [Topic].", correct: "There are several factors to consider", d1: "It is many points to think", d2: "Some points are here", d3: "We have to consider it" },
+    { part: "Introduction", ja: "[A]を重視する人もいれば、[B]を優先する人もいます。", en: "While some value [A], others ___ [B].", correct: "prioritize", d1: "like", d2: "want", d3: "focus" },
+    { part: "Introduction", ja: "この問題は、主に2つの視点から議論できます。", en: "This issue can be ___ two main perspectives.", correct: "discussed from", d1: "talking about", d2: "thought by", d3: "viewed in" },
+    { part: "Introduction", ja: "[点1]と[点2]に焦点を当てるべきです。", en: "The ___ [Point 1] and [Point 2].", correct: "focus should be on", d1: "point must be", d2: "idea is about", d3: "main thing is" },
+    { part: "Logic", ja: "最初の理由は[点1]に関連しています。", en: "The first reason ___ [Point 1].", correct: "involves", d1: "contains", d2: "is about", d3: "meaning" },
+    { part: "Logic", ja: "人々が〜するのは自然なことです。", en: "___ people to [do something].", correct: "It is natural for", d1: "Common is", d2: "People are natural", d3: "The fact is for" },
+    { part: "Logic", ja: "これが〜という結果につながります。", en: "This ___ [Result].", correct: "leads to", d1: "becomes", d2: "makes", d3: "causes to" },
+    { part: "Logic", ja: "この意味で、[トピック]は単にお金だけの問題ではありません。", en: "___, [Topic] is not just about money.", correct: "In this sense", d1: "By this point", d2: "Meaning this", d3: "To say this" },
+    { part: "Logic", ja: "これは私たちの日常生活に直接的な影響を与えます。", en: "This ___ our daily lives.", correct: "has a direct impact on", d1: "gives big effect to", d2: "makes change in", d3: "directly changes" },
+    { part: "Development", ja: "第二に、[点2]が考慮されるべきです。", en: "Second, [Point 2] ___.", correct: "should be taken into account", d1: "must be thinking", d2: "is important to see", d3: "needs to check" },
+    { part: "Development", ja: "もう一つの重要な側面は[点2]です。", en: "___ is [Point 2].", correct: "Another important aspect", d1: "Other good point", d2: "The next reason", d3: "Different side" },
+    { part: "Development", ja: "これの明確な例は〜です。", en: "A ___ this is [Situation].", correct: "clear example of", d1: "good story for", d2: "real thing about", d3: "famous case in" },
+    { part: "Development", ja: "具体的には、多くの人が〜に苦労しています。", en: "___, many people struggle with [Problem].", correct: "Specifically", d1: "Specially", d2: "Like this", d3: "For instance" },
+    { part: "Development", ja: "これは[特定の地域]の場合、特に当てはまります。", en: "This is ___ [Area].", correct: "especially true in the case of", d1: "very same as", d2: "mostly for", d3: "particularly seen for" },
+    { part: "Development", ja: "[点2]がなければ、〜を維持するのは困難です。", en: "___ [Point 2], it is difficult to maintain [Something].", correct: "Without", d1: "Unless", d2: "No have", d3: "Except" },
+    { part: "Development", ja: "その結果、人々は〜を失う可能性があります。", en: "___, people may lose their [Health].", correct: "As a result", d1: "By the way", d2: "For result", d3: "Finally" },
+    { part: "Conclusion", ja: "上述の理由により、[トピック]は極めて重要です。", en: "___, [Topic] is crucial.", correct: "For the reasons mentioned above", d1: "To say again", d2: "By these reasons", d3: "Looking at above" },
+    { part: "Conclusion", ja: "結論として、〜であることは明らかです。", en: "In conclusion, ___ [Main Idea].", correct: "it is clear that", d1: "I am sure that", d2: "we can say", d3: "it is important" },
+    { part: "Conclusion", ja: "[A]と[B]のバランスを見つけることが不可欠です。", en: "It is ___ find a balance between [A] and [B].", correct: "essential to", d1: "good to", d2: "better for", d3: "must be" }
+];
+
+let currentIdx = 0;
+
+function loadQuestion() {
+    const item = quizData[currentIdx];
+    document.getElementById('progress').textContent = `Question ${currentIdx + 1} / 20`;
+    document.getElementById('partLabel').textContent = item.part;
+    document.getElementById('jpText').textContent = item.ja;
+    document.getElementById('enText').textContent = item.en.replace("___", " ( ? ) ");
+    document.getElementById('nextBtn').style.display = "none";
+
+    const choices = [item.correct, item.d1, item.d2, item.d3];
+    shuffleArray(choices);
+
+    const area = document.getElementById('choicesArea');
+    area.innerHTML = "";
+    choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = "choice-btn";
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(btn, c, item.correct);
+        area.appendChild(btn);
+    });
+}
+
+function checkAnswer(btn, selected, correct) {
+    const allBtns = document.querySelectorAll('.choice-btn');
+    allBtns.forEach(b => b.disabled = true);
+
+    if (selected === correct) {
+        btn.classList.add('correct');
+    } else {
+        btn.classList.add('wrong');
+        allBtns.forEach(b => { if(b.textContent === correct) b.classList.add('correct'); });
+    }
+    document.getElementById('nextBtn').style.display = "inline-block";
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) {
+        loadQuestion();
+    } else {
+        document.getElementById('quiz-ui').innerHTML = "<h2>Mission Accomplished!</h2><p>You've mastered all 20 phrases!</p>";
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function preparePrint() {
+    const content = document.getElementById('print-content');
+    let currentPart = "";
+    quizData.forEach((d, i) => {
+        if(d.part !== currentPart) {
+            currentPart = d.part;
+            const container = document.createElement('div');
+            container.style.textAlign = "left"; // 枠を左寄せにする
+            const h = document.createElement('div');
+            h.className = "print-section-title";
+            h.textContent = currentPart;
+            container.appendChild(h);
+            content.appendChild(container);
+        }
+        const item = document.createElement('div');
+        item.className = "print-item";
+        const enWithBlank = d.en.replace("___", '<span class="blank"></span>');
+        item.innerHTML = `<span class="print-jp">${i+1}. ${d.ja}</span><span class="print-en">${enWithBlank}</span>`;
+        content.appendChild(item);
+    });
+}
+
+window.onload = () => {
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
