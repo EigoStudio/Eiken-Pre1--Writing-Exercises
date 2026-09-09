@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing: Urban Farming (Academic & Video-Based)</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+    
+    .topic-card {
+        background: white; padding: 20px; border-radius: 15px; border-left: 6px solid var(--correct-green);
+        margin-bottom: 20px; text-align: left; width: 100%; max-width: 860px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .topic-label { font-weight: bold; color: var(--correct-green); font-size: 0.8rem; text-transform: uppercase; }
+    .topic-text { font-size: 1.1rem; font-weight: bold; margin: 5px 0; color: var(--primary-blue); }
+    .points-text { font-size: 0.9rem; color: #d32f2f; font-weight: bold; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-gray);
+        flex-wrap: wrap;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;
+    }
+
+    .question-box {
+        font-size: 1.1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 25px; border-radius: 15px; margin-bottom: 15px; font-weight: bold; min-height: 50px; text-align: left;
+    }
+
+    .grammar-hint {
+        font-size: 0.85rem; color: var(--accent-teal); margin-bottom: 20px; font-weight: bold;
+        background: #e0f2f1; padding: 6px 16px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: 0.2s;
+        text-align: left;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 15px; border-top: 1px solid #eee; }
+    .word-btn { text-align: center; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 90px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #1a237e; border: 2px solid var(--primary-blue);
+        padding: 10px 18px; border-radius: 12px; cursor: grab; font-size: 1rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.4; border-style: dotted; }
+
+    .final-sentence {
+        font-size: 1.25rem; color: var(--primary-blue); font-weight: bold; padding: 25px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 16px 50px;
+        border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    .video-card {
+        background: #f0f4f8; padding: 30px; border-radius: 20px; border: 2px solid var(--border-gray);
+        text-align: center; margin-bottom: 20px;
+    }
+    .video-link-btn {
+        display: inline-block; background: #c62828; color: white; text-decoration: none;
+        padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(198,40,40,0.3); transition: 0.3s;
+    }
+    .video-link-btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { display: block !important; width: 100%; color: black; background: white; }
+        .print-page { page-break-after: always; padding: 10px; }
+        .print-title { font-size: 1.2rem; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
+        .print-q { margin-bottom: 15px; }
+        .vocab-row { display: flex; align-items: flex-end; margin-bottom: 10px; }
+        .vocab-jp { width: 55%; font-size: 0.95rem; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 35px; }
+        .sentence-ja { font-size: 0.9rem; font-weight: bold; }
+        .sentence-choices { font-size: 0.8rem; color: #444; font-style: italic; margin: 5px 0; }
+        .sentence-line { border-bottom: 1px solid #000; height: 35px; }
+        .video-q-box { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .video-q-text { font-weight: bold; font-size: 0.95rem; }
+        .video-q-options { font-size: 0.85rem; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Eiken Pre-1 Writing Exercise</h1>
+    <div class="sub-title">Urban Farming (Academic & Video-Based)</div>
+
+    <div class="topic-card">
+        <div class="topic-label">Writing Topic</div>
+        <div class="topic-text">In urban areas, should the government encourage vacant land to be used for farming?</div>
+        <div class="points-text">Focus: Employment / Community Safety / Fresh Produce Access / Local Cohesion</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch"><input type="checkbox" id="audioToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-video" onclick="switchMode('video')">Part 1: Video</button>
+            <button class="tab-btn" id="tab-comprehension" onclick="switchMode('comprehension')">Part 2: Video Quiz (10)</button>
+            <button class="tab-btn" id="tab-vocab" onclick="switchMode('vocab')">Part 3: Vocab (20)</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Part 4: Sentences (10)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する (A4)</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Part 2: Video Comprehension Questions</div>
+        <div id="print-video-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 3: Academic Vocabulary for Pre-1 Writing</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 4: Pre-1 Writing Sentence Structures</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const videoQuestions = [
+    { q: "1. Which city is featured in the video where urban farms are popping up on vacant lots?", choices: ["A) New York City", "B) Chicago", "C) Detroit", "D) Los Angeles"], ans: "B) Chicago", explanation: "The video highlights urban farming projects happening across Chicago." },
+    { q: "2. According to the video, what are urban farms creating besides growing fresh vegetables?", choices: ["A) Large shopping malls", "B) High-rise apartments", "C) Jobs and economic opportunities", "D) Industrial factories"], ans: "C) Jobs and economic opportunities", explanation: "Converting vacant lots into farms sprouts jobs and economic opportunity." },
+    { q: "3. What is the name of the nonprofit organization that operates 8 urban farm sites in the city?", choices: ["A) Chicago Green Project", "B) Urban Growers Collective", "C) Farmers for Tomorrow", "D) Fresh Food Alliance"], ans: "B) Urban Growers Collective", explanation: "The nonprofit Urban Growers Collective operates these urban farms." },
+    { q: "4. How did the Urban Growers Collective start 15 years ago?", choices: ["A) By importing food from foreign countries", "B) By educating teenagers on farming", "C) By selling farm machinery", "D) By building rooftop restaurants"], ans: "B) By educating teenagers on farming", explanation: "It began 15 years ago educating teens on farming." },
+    { q: "5. Approximately how many urban farms are estimated to exist in Chicago now?", choices: ["A) About 5", "B) About 15", "C) Around 38", "D) Over 500"], ans: "C) Around 38", explanation: "It is estimated that there are now some 38 urban farms in Chicago." },
+    { q: "6. What problem in the neighborhoods do farming proponents hope to address by providing jobs?", choices: ["A) Heavy traffic congestion", "B) Increasing violence and safety concerns", "C) High internet costs", "D) Noise from airplanes"], ans: "B) Increasing violence and safety concerns", explanation: "Providing jobs through farming helps shift the dynamic of violence and safety issues." },
+    { q: "7. How do urban farms help local communities directly regarding food access?", choices: ["A) By feeding a community with fresh produce", "B) By exporting food exclusively to other countries", "C) By encouraging people to eat fast food", "D) By replacing fresh vegetables with processed goods"], ans: "A) By feeding a community with fresh produce", explanation: "Urban farms help feed communities and bring fresh food to underserved areas." },
+    { q: "8. What kind of land in Chicago is referred to as 'fertile ground' by farming proponents?", choices: ["A) Hundreds of blighted and empty blocks", "B) Asphalt highways", "C) Private luxury gardens", "D) Underground subway tunnels"], ans: "A) Hundreds of blighted and empty blocks", explanation: "Blighted and empty blocks represent fertile ground for new urban farms." },
+    { q: "9. Besides teenagers, who does the Urban Growers Collective train in farming now?", choices: ["A) Only elementary school children", "B) Adults, many of whom start their own small farms", "C) Foreign tourists", "D) Retired professional athletes"], ans: "B) Adults, many of whom start their own small farms", explanation: "They train adults, leading many to establish their own small agricultural plots." },
+    { q: "10. What positive physical transformation do urban farms bring to vacant city areas?", choices: ["A) They help beautify the community and make green acres", "B) They cover the ground completely with concrete", "C) They turn parks into parking lots", "D) They build billboard towers"], ans: "A) They help beautify the community and make green acres", explanation: "Urban farms transform blighted spaces into vibrant, green, and beautiful areas." }
+];
+
+// エッセイでそのまま使えるフォーマル（アカデミック）な語彙20選
+const vocabDataRaw = [
+    { en: "create employment opportunities", jp: "[Jobs] 雇用機会を創出する" },
+    { en: "full-time employment", jp: "[Jobs] 常勤雇用（フルタイム雇用）" },
+    { en: "provide agricultural training", jp: "[Jobs] 農業の訓練（研修）を提供する" },
+    { en: "foster local entrepreneurs", jp: "[Jobs] 地元の起業家（農園オーナー）を育成する" },
+    { en: "stimulate the local economy", jp: "[Jobs] 地域経済を刺激・活性化する" },
+    { en: "mitigate safety concerns", jp: "[Safety] 治安・安全上の懸念を軽減する" },
+    { en: "reduce crime rates", jp: "[Safety] 犯罪率を低下させる" },
+    { en: "blighted urban property", jp: "[Safety] 荒廃した都市物件・空き地" },
+    { en: "transform neglected neighborhoods", jp: "[Safety] 放置された地域社会を変貌させる" },
+    { en: "deter criminal activities", jp: "[Safety] 犯罪活動を抑止する" },
+    { en: "ensure a stable supply of fresh produce", jp: "[Fresh Produce] 新鮮な農産物の安定供給を確保する" },
+    { en: "address food scarcity", jp: "[Fresh Produce] 食料不足（食料の砂漠化）に対処する" },
+    { en: "improve nutritional standards", jp: "[Fresh Produce] 栄養水準を向上させる" },
+    { en: "under-served urban areas", jp: "[Fresh Produce] サービス（店舗など）が行き届いていない都市地域" },
+    { en: "promote local food production", jp: "[Fresh Produce] 地元での食料生産（地産地消）を推進する" },
+    { en: "beautify the urban landscape", jp: "[Community] 都市の景観を美化する" },
+    { en: "strengthen social cohesion", jp: "[Community] 社会的結束（住民同士の繋がり）を強化する" },
+    { en: "educational opportunities for youth", jp: "[Community] 若者のための教育機会" },
+    { en: "foster community engagement", jp: "[Community] 地域社会への関与（参加度）を高める" },
+    { en: "sustainable urban development", jp: "[Community] 持続可能な都市開発" }
+];
+
+// 英文の語順・文法構造に自然にリンクした明確な直訳和訳（英検準1級レベル）
+const sentenceData = [
+    { ja: "【Jobs】空き地を農園に変換することは、都市の住民のために雇用機会を創出することができます。", en: "Converting vacant lots into farms can create employment opportunities for urban residents.", hint: "動名詞主語 (Converting A into B) / create employment opportunities" },
+    { ja: "【Jobs】都市農業は、かつて経験のなかった若者や大人に常勤雇用を提供することができます。", en: "Urban farming can provide full-time employment for youth and adults who had no prior experience.", hint: "provide full-time employment for A / 関係代名詞 who" },
+    { ja: "【Jobs】住民に農業の訓練を提供することは、彼らが自分自身の小規模な農業ビジネスを開始することを可能にします。", en: "Providing agricultural training to residents allows them to start their own small agricultural businesses.", hint: "Providing A to B / allow A to do" },
+    { ja: "【Safety】都市農業を通じて雇用を提供することは、増加する暴力や治安上の懸念に対処するのに役立ちます。", en: "Providing jobs through urban agriculture helps address increasing violence and safety concerns.", hint: "Providing jobs through ~ / address safety concerns" },
+    { ja: "【Safety】荒廃した都市物件を生産的な緑地へと変貌させることは、犯罪活動を抑止することができます。", en: "Transforming blighted urban property into productive green spaces can deter criminal activities.", hint: "Transforming A into B / deter criminal activities" },
+    { ja: "【Safety】放置された地域社会を活性化させることは、近隣地域全体の安全性を向上させます。", en: "Revitalizing neglected neighborhoods improves the overall safety of the community.", hint: "動名詞主語 (Revitalizing...) / overall safety" },
+    { ja: "【Fresh Produce】都市農園は、食料品店が不十分な地域において、新鮮な農産物の安定供給を確保する上で重要な役割を果たします。", en: "Urban farms play a crucial role in ensuring a stable supply of fresh produce in under-served areas.", hint: "play a crucial role in ~ing / in under-served areas" },
+    { ja: "【Fresh Produce】都市の中に農園を設置することは、住民がより新鮮で栄養価の高い野菜を手に入れることを可能にします。", en: "Establishing farms within cities enables residents to gain access to fresher and more nutritious vegetables.", hint: "Establishing farms / enable A to do / gain access to ~" },
+    { ja: "【Community】空き地を緑地に変えることは、都市の景観を美化し、住民の間に誇りを育みます。", en: "Turning vacant land into green spaces beautifies the urban landscape and fosters pride among residents.", hint: "Turning A into B / beautify the urban landscape" },
+    { ja: "【Community】若者に農業についての教育機会を提供することは、社会的結束を強化し、持続可能な都市開発を推進します。", en: "Offering educational opportunities on farming to youth strengthens social cohesion and promotes sustainable urban development.", hint: "Offering A to B / strengthen social cohesion" }
+];
+
+let currentMode = 'video';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedOption = "";
+let vocabData = [];
+
+/* --- 音声読み上げ設定（速度0.8・自然な音声選択） --- */
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const usVoices = voices.filter(v => v.lang === "en-US" || v.lang === "en_US" || v.lang.startsWith("en"));
+    
+    preferredVoice = 
+        usVoices.find(v => v.name.includes("Natural")) ||
+        usVoices.find(v => v.name.includes("Online")) ||
+        usVoices.find(v => v.name.includes("Samantha")) ||
+        usVoices.find(v => v.name.includes("Jenny")) ||
+        usVoices.find(v => v.name.includes("Aria")) ||
+        usVoices.find(v => v.name.includes("Ava")) ||
+        usVoices.find(v => v.name.includes("Google US English")) ||
+        usVoices[0] || 
+        voices[0];
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    if (!preferredVoice) loadVoices();
+
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) uttr.voice = preferredVoice;
+    uttr.lang = 'en-US';
+    uttr.rate = 0.8; // 自然な速度 0.8
+    uttr.pitch = 1.0;
+
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.style.display = "inline-block";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    const qBox = document.getElementById('questionText');
+    area.innerHTML = "";
+    hintBox.style.display = "none";
+
+    if (currentMode === 'video') {
+        qBox.textContent = "Part 1: Watch the Video";
+        btn.style.display = "none";
+        area.innerHTML = `
+            <div class="video-card">
+                <h2>Urban Farms Turn Vacant Lots Into Food On Your Table</h2>
+                <p>動画（CBS News）を視聴して、シカゴの空き地で行われている都市農業の取り組みを確認しましょう！</p>
+                <a href="https://youtu.be/E1kvHAACwUw?si=cwY1IahaQujRetxq" target="_blank" class="video-link-btn">▶ YouTubeで動画を再生する</a>
+            </div>
+        `;
+    } else if (currentMode === 'comprehension') {
+        const item = videoQuestions[currentIdx];
+        qBox.textContent = item.q;
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        item.choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.jp}`;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'reorder') {
+        const item = sentenceData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.ja}`;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                const wordObj = {text: w, btnId: b.id};
+                userSentence.push(wordObj);
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOM = [...area.querySelectorAll('.answer-word')];
+            const newList = [];
+            currentDOM.forEach(el => {
+                const found = userSentence.find(item => item.text === el.textContent);
+                if(found) newList.push(found);
+            });
+            userSentence = newList;
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+            if(userSentence.length === 0) document.getElementById('mainActionBtn').disabled = true;
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let isCorrect = false;
+        let correctText = "";
+
+        if (currentMode === 'comprehension') {
+            const item = videoQuestions[currentIdx];
+            correctText = item.ans;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'vocab') {
+            correctText = vocabData[currentIdx].en;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'reorder') {
+            correctText = sentenceData[currentIdx].en;
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            if (currentMode === 'vocab' || currentMode === 'reorder') speak(correctText);
+            
+            if (currentMode === 'comprehension') {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">Correct! ${videoQuestions[currentIdx].explanation}</div>`;
+            } else {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            }
+            
+            resultMsg.innerHTML = "Excellent! Perfect understanding! 🚀";
+            resultMsg.style.color = "var(--correct-green)";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Try again! Check your answer. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Correct: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        let max = 0;
+        if (currentMode === 'comprehension') max = videoQuestions.length;
+        else if (currentMode === 'vocab') max = vocabData.length;
+        else if (currentMode === 'reorder') max = sentenceData.length;
+
+        if (currentIdx < max) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-ui').innerHTML = `<h2>Great Job!</h2><p>You have completed this part of the Urban Farming writing exercise!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+// preparePrint 関数内の該当箇所の修正コード
+function preparePrint() {
+    document.getElementById('print-video-content').innerHTML = videoQuestions.map((q, i) => `
+        <div class="video-q-box">
+            <div class="video-q-text">${q.q}</div>
+            <div class="video-q-options">${q.choices.join("<br>")}</div>
+        </div>
+    `).join('');
+
+    // ポイントラベル（[Jobs]など）をプリント表示時に除去してすっきり表示
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => {
+        let cleanJp = d.jp.replace(/^\[.*?\]\s*/, ''); // [Jobs] などの表記を自動カット
+        return `<div class="vocab-row"><span class="vocab-jp">${i+1}. ${cleanJp}</span><div class="vocab-line"></div></div>`;
+    }).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
