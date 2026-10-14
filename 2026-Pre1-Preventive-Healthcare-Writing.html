@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing: Preventive Healthcare (Academic & Video-Based)</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+    
+    .topic-card {
+        background: white; padding: 20px; border-radius: 15px; border-left: 6px solid var(--correct-green);
+        margin-bottom: 20px; text-align: left; width: 100%; max-width: 860px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .topic-label { font-weight: bold; color: var(--correct-green); font-size: 0.8rem; text-transform: uppercase; }
+    .topic-text { font-size: 1.1rem; font-weight: bold; margin: 5px 0; color: var(--primary-blue); }
+    .points-text { font-size: 0.9rem; color: #d32f2f; font-weight: bold; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-gray);
+        flex-wrap: wrap;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;
+    }
+
+    .question-box {
+        font-size: 1.1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 25px; border-radius: 15px; margin-bottom: 15px; font-weight: bold; min-height: 50px; text-align: left;
+    }
+
+    .grammar-hint {
+        font-size: 0.85rem; color: var(--accent-teal); margin-bottom: 20px; font-weight: bold;
+        background: #e0f2f1; padding: 6px 16px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: 0.2s;
+        text-align: left;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 15px; border-top: 1px solid #eee; }
+    .word-btn { text-align: center; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 90px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #1a237e; border: 2px solid var(--primary-blue);
+        padding: 10px 18px; border-radius: 12px; cursor: grab; font-size: 1rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.4; border-style: dotted; }
+
+    .final-sentence {
+        font-size: 1.25rem; color: var(--primary-blue); font-weight: bold; padding: 25px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 16px 50px;
+        border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    .video-card {
+        background: #f0f4f8; padding: 30px; border-radius: 20px; border: 2px solid var(--border-gray);
+        text-align: center; margin-bottom: 20px;
+    }
+    .video-link-btn {
+        display: inline-block; background: #c62828; color: white; text-decoration: none;
+        padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(198,40,40,0.3); transition: 0.3s;
+    }
+    .video-link-btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { display: block !important; width: 100%; color: black; background: white; }
+        .print-page { page-break-after: always; padding: 10px; }
+        .print-title { font-size: 1.2rem; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
+        .print-q { margin-bottom: 15px; }
+        .vocab-row { display: flex; align-items: flex-end; margin-bottom: 10px; }
+        .vocab-jp { width: 55%; font-size: 0.95rem; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 35px; }
+        .sentence-ja { font-size: 0.9rem; font-weight: bold; }
+        .sentence-choices { font-size: 0.8rem; color: #444; font-style: italic; margin: 5px 0; }
+        .sentence-line { border-bottom: 1px solid #000; height: 35px; }
+        .video-q-box { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .video-q-text { font-weight: bold; font-size: 0.95rem; }
+        .video-q-options { font-size: 0.85rem; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Eiken Pre-1 Writing Exercise</h1>
+    <div class="sub-title">Preventive Healthcare (Academic & Video-Based)</div>
+
+    <div class="topic-card">
+        <div class="topic-label">Writing Topic</div>
+        <div class="topic-text">Should governments spend more money on preventive healthcare?</div>
+        <div class="points-text">Points: Cost / Education / Life expectancy / Personal responsibility</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch"><input type="checkbox" id="audioToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-video" onclick="switchMode('video')">Part 1: Video</button>
+            <button class="tab-btn" id="tab-comprehension" onclick="switchMode('comprehension')">Part 2: Video Quiz (10)</button>
+            <button class="tab-btn" id="tab-vocab" onclick="switchMode('vocab')">Part 3: Vocab (20)</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Part 4: Sentences (10)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する (A4)</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Part 2: Video Comprehension Questions</div>
+        <div id="print-video-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 3: Academic Vocabulary for Pre-1 Writing</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 4: Pre-1 Writing Sentence Structures</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const videoQuestions = [
+    {
+        "q": "1. What is the primary focus of preventive healthcare compared to reactive healthcare?",
+        "choices": [
+            "A) Performing expensive surgical procedures",
+            "B) Preventing diseases before they occur through early detection and healthy habits",
+            "C) Treating acute illness after symptoms appear",
+            "D) Importing advanced medical devices"
+        ],
+        "ans": "B) Preventing diseases before they occur through early detection and healthy habits",
+        "explanation": "Preventive healthcare aims to forestall medical conditions before they develop rather than treating existing conditions."
+    },
+    {
+        "q": "2. How can government investment in preventive healthcare reduce overall national medical costs?",
+        "choices": [
+            "A) By lowering the long-term expenses of treating chronic diseases",
+            "B) By eliminating doctors' salaries completely",
+            "C) By building fewer public parks",
+            "D) By taxing healthy food products"
+        ],
+        "ans": "A) By lowering the long-term expenses of treating chronic diseases",
+        "explanation": "Preventing chronic conditions early avoids costly hospitalizations and complex treatments in the long run."
+    },
+    {
+        "q": "3. What role does public education play in preventive health measures?",
+        "choices": [
+            "A) It forces citizens to follow strict dietary laws",
+            "B) It replaces professional medical care with online advice",
+            "C) It informs citizens about nutrition, exercise, and regular health checkups",
+            "D) It discourages people from visiting hospitals"
+        ],
+        "ans": "C) It informs citizens about nutrition, exercise, and regular health checkups",
+        "explanation": "Educational campaigns empower individuals with the knowledge needed to make health-conscious lifestyle choices."
+    },
+    {
+        "q": "4. How does preventive healthcare contribute to increasing life expectancy?",
+        "choices": [
+            "A) By extending human DNA artificial limits",
+            "B) By encouraging people to work longer hours",
+            "C) By banning all fast food restaurants",
+            "D) By detecting serious health issues early when they are most treatable"
+        ],
+        "ans": "D) By detecting serious health issues early when they are most treatable",
+        "explanation": "Early screening and healthy habits lower mortality rates from cardiovascular diseases, cancer, and diabetes."
+    },
+    {
+        "q": "5. What argument is often made regarding personal responsibility in healthcare?",
+        "choices": [
+            "A) Individuals should rely entirely on government support",
+            "B) Personal choices directly influence health, so governments shouldn't bear all costs",
+            "C) Personal habits have no impact on overall wellness",
+            "D) Health insurance should cover only lifestyle-related illnesses"
+        ],
+        "ans": "B) Personal choices directly influence health, so governments shouldn't bear all costs",
+        "explanation": "Critics often point out that lifestyle choices are individual responsibilities that public funds cannot solely fix."
+    },
+    {
+        "q": "6. Which of the following is considered a key preventive health intervention?",
+        "choices": [
+            "A) Regular health screenings and routine vaccinations",
+            "B) Open-heart surgery",
+            "C) Intensive care unit (ICU) admission",
+            "D) Emergency organ transplantation"
+        ],
+        "ans": "A) Regular health screenings and routine vaccinations",
+        "explanation": "Screenings, checkups, and vaccinations are classic examples of primary and secondary preventive care."
+    },
+    {
+        "q": "7. How does promoting healthy lifestyles impact economic productivity?",
+        "choices": [
+            "A) It decreases worker productivity by causing absences for checkups",
+            "B) It has no measurable economic impact",
+            "C) It increases productivity by maintaining a healthier, more active workforce",
+            "D) It causes widespread unemployment in hospitals"
+        ],
+        "ans": "C) It increases productivity by maintaining a healthier, more active workforce",
+        "explanation": "A healthier population means fewer sick days, higher workforce productivity, and economic vitality."
+    },
+    {
+        "q": "8. What challenge do governments face when prioritizing funding for preventive healthcare?",
+        "choices": [
+            "A) Preventive care costs more than late-stage treatment",
+            "B) Citizens generally oppose health education programs",
+            "C) Vaccines and health checkups are unavailable in developed nations",
+            "D) Immediate results are hard to see because financial benefits take decades to materialize"
+        ],
+        "ans": "D) Immediate results are hard to see because financial benefits take decades to materialize",
+        "explanation": "Preventive investments yield long-term savings, making short-term budget allocation politically challenging."
+    },
+    {
+        "q": "9. What is a common example of government-sponsored preventive education?",
+        "choices": [
+            "A) High-sugar dietary guidelines",
+            "B) Public awareness campaigns against smoking and obesity",
+            "C) Promoting sedentary indoor activities",
+            "D) Restricting access to sports facilities"
+        ],
+        "ans": "B) Public awareness campaigns against smoking and obesity",
+        "explanation": "Anti-smoking campaigns and nutritional guidelines are typical public education efforts funded by governments."
+    },
+    {
+        "q": "10. What balance must governments achieve regarding preventive healthcare policy?",
+        "choices": [
+            "A) Closing hospitals to force citizens into outdoor exercise",
+            "B) Spending all medical budgets on education while closing emergency rooms",
+            "C) Balancing public funding with individual accountability for personal health choices",
+            "D) Making medical checkups strictly illegal for young people"
+        ],
+        "ans": "C) Balancing public funding with individual accountability for personal health choices",
+        "explanation": "An effective policy combines public investment in preventive infrastructure with personal health responsibility."
+    }
+];
+const vocabDataRaw = [
+    {
+        "en": "alleviate the financial burden on public healthcare",
+        "jp": "[Cost] 公的医療の財政的負担を軽減する"
+    },
+    {
+        "en": "reduce long-term medical expenditure",
+        "jp": "[Cost] 長期的な医療費（支出）を削減する"
+    },
+    {
+        "en": "curb escalating healthcare costs",
+        "jp": "[Cost] 膨れ上がる医療費を抑制する"
+    },
+    {
+        "en": "allocate government funds to early intervention",
+        "jp": "[Cost] 早期介入に政府資金を充当する"
+    },
+    {
+        "en": "cost-effective healthcare strategy",
+        "jp": "[Cost] 費用対効果の高い医療戦略"
+    },
+    {
+        "en": "launch public health campaigns",
+        "jp": "[Education] 公衆衛生（健康啓発）キャンペーンを開始する"
+    },
+    {
+        "en": "raise awareness about nutritional balance",
+        "jp": "[Education] 栄養バランスについての意識を高める"
+    },
+    {
+        "en": "encourage healthy lifestyle habits",
+        "jp": "[Education] 健康的な生活習慣を促進する"
+    },
+    {
+        "en": "disseminate medical information",
+        "jp": "[Education] 医療（健康）情報を普及させる"
+    },
+    {
+        "en": "educate citizens on disease prevention",
+        "jp": "[Education] 疾病予防について市民を教育する"
+    },
+    {
+        "en": "extend average life expectancy",
+        "jp": "[Life expectancy] 平均寿命を延ばす"
+    },
+    {
+        "en": "promote healthy aging in the population",
+        "jp": "[Life expectancy] 国民の健康的な加齢（健康寿命）を推進する"
+    },
+    {
+        "en": "detect chronic illnesses at an early stage",
+        "jp": "[Life expectancy] 慢性疾患を早期段階で発見する"
+    },
+    {
+        "en": "lower premature mortality rates",
+        "jp": "[Life expectancy] 早期死亡率を低下させる"
+    },
+    {
+        "en": "improve the overall quality of life",
+        "jp": "[Life expectancy] 全体的な生活の質（QOL）を向上させる"
+    },
+    {
+        "en": "foster personal health responsibility",
+        "jp": "[Personal responsibility] 個人の健康維持に対する自覚・責任感を養う"
+    },
+    {
+        "en": "empower individuals to make informed choices",
+        "jp": "[Personal responsibility] 個人が情報に基づいた確実な選択を行えるようにする"
+    },
+    {
+        "en": "take proactive steps toward wellness",
+        "jp": "[Personal responsibility] 健康維持に向けて主体的な行動を取る"
+    },
+    {
+        "en": "modify harmful daily habits",
+        "jp": "[Personal responsibility] 害のある生活習慣を改める"
+    },
+    {
+        "en": "balance government support with individual effort",
+        "jp": "[Personal responsibility] 政府の支援と個人の努力のバランスを取る"
+    }
+];
+const sentenceData = [
+    {
+        "ja": "【Cost】予防医療に投資することは、政府が長期的な医療費を大幅に削減することを可能にします。",
+        "en": "Investing in preventive healthcare enables governments to significantly reduce long-term medical expenditure.",
+        "hint": "Investing in ~ / enable A to do / reduce long-term medical expenditure"
+    },
+    {
+        "ja": "【Cost】疾患の早期発見を優先することは、膨れ上がる公的医療への財政的負担を軽減する費用対効果の高い戦略です。",
+        "en": "Prioritizing early detection of diseases is a cost-effective strategy to alleviate the escalating financial burden on public healthcare.",
+        "hint": "Prioritizing early detection / cost-effective strategy / alleviate the escalating financial burden"
+    },
+    {
+        "ja": "【Education】政府主導の健康啓発キャンペーンを実施することは、国民が健康的な生活習慣を身につけるのを助けます。",
+        "en": "Implementing government-led health campaigns helps citizens adopt healthy lifestyle habits.",
+        "hint": "Implementing ~ campaigns / help A do / adopt healthy habits"
+    },
+    {
+        "ja": "【Education】学校や地域社会で栄養についての教育を推進することは、将来の生活習慣病を予防する効果的な手段です。",
+        "en": "Promoting nutrition education in schools and communities is an effective way to prevent future lifestyle diseases.",
+        "hint": "Promoting nutrition education / effective way to prevent"
+    },
+    {
+        "ja": "【Life expectancy】定期検診を奨励することは、慢性疾患を早期に発見し、平均寿命を延ばすことに貢献します。",
+        "en": "Encouraging regular health checkups contributes to detecting chronic illnesses early and extending average life expectancy.",
+        "hint": "Encouraging ~ / contribute to -ing / extend average life expectancy"
+    },
+    {
+        "ja": "【Life expectancy】健康的な加齢を推進することは、高齢者が自立した質の高い生活を長く維持することを可能にします。",
+        "en": "Promoting healthy aging allows elderly citizens to maintain a high quality of life for a longer period.",
+        "hint": "Promoting healthy aging / allow A to do / maintain a high quality of life"
+    },
+    {
+        "ja": "【Personal responsibility】健康教育を通じて個人の責任感を養うことは、人々が予防的な保健行動を取るよう促します。",
+        "en": "Fostering personal responsibility through health education encourages people to take proactive steps toward wellness.",
+        "hint": "Fostering personal responsibility / encourage A to do / take proactive steps"
+    },
+    {
+        "ja": "【Personal responsibility】個人の生活習慣に対する自己管理と政府の支援を両立させることが、持続可能な社会に不可欠です。",
+        "en": "Balancing government support with individual effort for lifestyle habits is essential for a sustainable society.",
+        "hint": "Balancing A with B / essential for a sustainable society"
+    },
+    {
+        "ja": "【Cost / Education】予防医療への財政支出を増やすことは、医療崩壊を防ぐための賢明な投資です。",
+        "en": "Increasing government spending on preventive care is a wise investment to prevent the collapse of the medical system.",
+        "hint": "Increasing government spending / wise investment / prevent the collapse"
+    },
+    {
+        "ja": "【Summary】結論として、予防医療への継続的な支援は国民の寿命を延ばすだけでなく、国の経済的安定にも寄与します。",
+        "en": "In conclusion, continuous support for preventive healthcare not only extends citizens' lifespans but also contributes to economic stability.",
+        "hint": "In conclusion / not only A but also B / contribute to economic stability"
+    }
+];
+
+let currentMode = 'video';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedOption = "";
+let vocabData = [];
+
+/* --- 音声読み上げ設定（速度0.8・自然な音声選択） --- */
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const usVoices = voices.filter(v => v.lang === "en-US" || v.lang === "en_US" || v.lang.startsWith("en"));
+    
+    preferredVoice = 
+        usVoices.find(v => v.name.includes("Natural")) ||
+        usVoices.find(v => v.name.includes("Online")) ||
+        usVoices.find(v => v.name.includes("Samantha")) ||
+        usVoices.find(v => v.name.includes("Jenny")) ||
+        usVoices.find(v => v.name.includes("Aria")) ||
+        usVoices.find(v => v.name.includes("Ava")) ||
+        usVoices.find(v => v.name.includes("Google US English")) ||
+        usVoices[0] || 
+        voices[0];
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    if (!preferredVoice) loadVoices();
+
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) uttr.voice = preferredVoice;
+    uttr.lang = 'en-US';
+    uttr.rate = 0.8; // 自然な速度 0.8
+    uttr.pitch = 1.0;
+
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.style.display = "inline-block";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    const qBox = document.getElementById('questionText');
+    area.innerHTML = "";
+    hintBox.style.display = "none";
+
+    if (currentMode === 'video') {
+        qBox.textContent = "Part 1: Watch the Video";
+        btn.style.display = "none";
+        area.innerHTML = `
+            <div class="video-card">
+                <h2>Should Governments Spend More Money on Preventive Healthcare?</h2>
+                <p>動画を視聴して、予防医療（Preventive Healthcare）に対する公的支出やその重要性について確認しましょう！</p>
+                <a href="https://www.youtube.com/watch?v=rCD3uU7CBbo" target="_blank" class="video-link-btn">▶ YouTubeで動画を再生する</a>
+            </div>
+        `;
+    } else if (currentMode === 'comprehension') {
+        const item = videoQuestions[currentIdx];
+        qBox.textContent = item.q;
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        item.choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.jp}`;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'reorder') {
+        const item = sentenceData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.ja}`;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                const wordObj = {text: w, btnId: b.id};
+                userSentence.push(wordObj);
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOM = [...area.querySelectorAll('.answer-word')];
+            const newList = [];
+            currentDOM.forEach(el => {
+                const found = userSentence.find(item => item.text === el.textContent);
+                if(found) newList.push(found);
+            });
+            userSentence = newList;
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+            if(userSentence.length === 0) document.getElementById('mainActionBtn').disabled = true;
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let isCorrect = false;
+        let correctText = "";
+
+        if (currentMode === 'comprehension') {
+            const item = videoQuestions[currentIdx];
+            correctText = item.ans;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'vocab') {
+            correctText = vocabData[currentIdx].en;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'reorder') {
+            correctText = sentenceData[currentIdx].en;
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            if (currentMode === 'vocab' || currentMode === 'reorder') speak(correctText);
+            
+            if (currentMode === 'comprehension') {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">Correct! ${videoQuestions[currentIdx].explanation}</div>`;
+            } else {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            }
+            
+            resultMsg.innerHTML = "Excellent! Perfect understanding! 🚀";
+            resultMsg.style.color = "var(--correct-green)";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Try again! Check your answer. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Correct: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        let max = 0;
+        if (currentMode === 'comprehension') max = videoQuestions.length;
+        else if (currentMode === 'vocab') max = vocabData.length;
+        else if (currentMode === 'reorder') max = sentenceData.length;
+
+        if (currentIdx < max) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-ui').innerHTML = `<h2>Great Job!</h2><p>You have completed this part of the Preventive Healthcare writing exercise!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-video-content').innerHTML = videoQuestions.map((q, i) => `
+        <div class="video-q-box">
+            <div class="video-q-text">${q.q}</div>
+            <div class="video-q-options">${q.choices.join("<br>")}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => {
+        let cleanJp = d.jp.replace(/^\[.*?\]\s*/, '');
+        return `<div class="vocab-row"><span class="vocab-jp">${i+1}. ${cleanJp}</span><div class="vocab-line"></div></div>`;
+    }).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
