@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing: Free University Education (Video-Based)</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+    
+    .topic-card {
+        background: white; padding: 20px; border-radius: 15px; border-left: 6px solid var(--accent-teal);
+        margin-bottom: 20px; text-align: left; width: 100%; max-width: 860px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .topic-label { font-weight: bold; color: var(--accent-teal); font-size: 0.8rem; text-transform: uppercase; }
+    .topic-text { font-size: 1.15rem; font-weight: bold; margin: 5px 0; color: var(--primary-blue); }
+    .points-text { font-size: 0.9rem; color: #d32f2f; font-weight: bold; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-gray);
+        flex-wrap: wrap;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;
+    }
+
+    .question-box {
+        font-size: 1.1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 25px; border-radius: 15px; margin-bottom: 15px; font-weight: bold; min-height: 50px; text-align: left;
+    }
+
+    .grammar-hint {
+        font-size: 0.85rem; color: var(--accent-teal); margin-bottom: 20px; font-weight: bold;
+        background: #e0f2f1; padding: 6px 16px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: 0.2s;
+        text-align: left;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 15px; border-top: 1px solid #eee; }
+    .word-btn { text-align: center; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 90px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #1a237e; border: 2px solid var(--primary-blue);
+        padding: 10px 18px; border-radius: 12px; cursor: grab; font-size: 1rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.4; border-style: dotted; }
+
+    .final-sentence {
+        font-size: 1.2rem; color: var(--primary-blue); font-weight: bold; padding: 25px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 16px 50px;
+        border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    .video-card {
+        background: #f0f4f8; padding: 30px; border-radius: 20px; border: 2px solid var(--border-gray);
+        text-align: center; margin-bottom: 20px;
+    }
+    .video-link-btn {
+        display: inline-block; background: #c62828; color: white; text-decoration: none;
+        padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(198,40,40,0.3); transition: 0.3s;
+    }
+    .video-link-btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { display: block !important; width: 100%; color: black; background: white; }
+        .print-page { page-break-after: always; padding: 10px; }
+        .print-title { font-size: 1.2rem; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
+        .print-q { margin-bottom: 15px; }
+        .vocab-row { display: flex; align-items: flex-end; margin-bottom: 10px; }
+        .vocab-jp { width: 55%; font-size: 0.95rem; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 35px; }
+        .sentence-ja { font-size: 0.9rem; font-weight: bold; }
+        .sentence-choices { font-size: 0.8rem; color: #444; font-style: italic; margin: 5px 0; }
+        .sentence-line { border-bottom: 1px solid #000; height: 35px; }
+        .video-q-box { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .video-q-text { font-weight: bold; font-size: 0.95rem; }
+        .video-q-options { font-size: 0.85rem; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Eiken Pre-1 Writing Exercise</h1>
+    <div class="sub-title">Higher Education (Academic & Video-Based Series)</div>
+
+    <div class="topic-card">
+        <div class="topic-label">Writing Topic</div>
+        <div class="topic-text">Should university education be free for everyone?</div>
+        <div class="points-text">Points: Equal opportunity / Quality / Taxes / Responsibility</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch"><input type="checkbox" id="audioToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-video" onclick="switchMode('video')">Part 1: Video</button>
+            <button class="tab-btn" id="tab-comprehension" onclick="switchMode('comprehension')">Part 2: Video Quiz (10)</button>
+            <button class="tab-btn" id="tab-vocab" onclick="switchMode('vocab')">Part 3: Vocab (20)</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Part 4: Sentences (10)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Part 2: Video Comprehension Questions</div>
+        <div id="print-video-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 3: Academic Vocabulary for Pre-1 Writing (Points-Aligned)</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 4: Pre-1 Writing Sentence Structures</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+// 正解ラベルの分布をバランスよく均等に分散:
+// Q1: B, Q2: C, Q3: D, Q4: A, Q5: C, Q6: D, Q7: A, Q8: B, Q9: D, Q10: C
+// (A: 2問, B: 2問, C: 3問, D: 3問)
+const videoQuestions = [
+    { 
+        q: "1. What is the central policy question discussed regarding higher education in the video?", 
+        choices: [
+            "A) Should universities eliminate entrance examinations completely?", 
+            "B) Should governments make university education free for all citizens?", 
+            "C) Should high schools be replaced by online colleges?", 
+            "D) Should governments cut funding for vocational trade schools?"
+        ], 
+        ans: "B) Should governments make university education free for all citizens?", 
+        explanation: "The core debate focuses on whether college education should be made completely tuition-free by the government." 
+    },
+    { 
+        q: "2. According to supporters, how does free higher education help low-income students?", 
+        choices: [
+            "A) It allows them to bypass entrance exams entirely", 
+            "B) It gives them guaranteed government jobs upon graduation", 
+            "C) It enables talented students to climb the socioeconomic ladder without debt", 
+            "D) It exempts them from paying any future income taxes"
+        ], 
+        ans: "C) It enables talented students to climb the socioeconomic ladder without debt", 
+        explanation: "Advocates argue that eliminating tuition removes financial barriers and fosters upward social mobility." 
+    },
+    { 
+        q: "3. What negative consequence can happen to the value of a degree when nearly everyone attends college?", 
+        choices: [
+            "A) Degrees become legally invalid after 5 years", 
+            "B) University professors will receive higher salaries automatically", 
+            "C) Companies will refuse to hire any graduates", 
+            "D) College degrees will become the next high school diploma through credential inflation"
+        ], 
+        ans: "D) College degrees will become the next high school diploma through credential inflation", 
+        explanation: "As more people hold degrees, employers raise requirements, making a bachelor's degree the baseline 'new high school diploma'." 
+    },
+    { 
+        q: "4. What is 'degree inflation' (or credential inflation) as discussed in the context of higher education?", 
+        choices: [
+            "A) Jobs requiring a degree even though the actual tasks do not need university-level skills", 
+            "B) The continuous rise in college tuition fees each year", 
+            "C) The increase in the number of universities offering STEM courses", 
+            "D) A government tax placed on college graduation certificates"
+        ], 
+        ans: "A) Jobs requiring a degree even though the actual tasks do not need university-level skills", 
+        explanation: "Degree inflation occurs when jobs that previously did not require higher education now demand a college degree." 
+    },
+    { 
+        q: "5. From the perspective of taxpayers, what is a primary criticism of blanket free tuition?", 
+        choices: [
+            "A) Tax rates would immediately drop to zero", 
+            "B) It only benefits senior citizens who have already retired", 
+            "C) Taxpayers are forced to subsidize degrees that may not benefit society as a whole", 
+            "D) Private corporations would stop paying taxes completely"
+        ], 
+        ans: "C) Taxpayers are forced to subsidize degrees that may not benefit society as a whole", 
+        explanation: "Critics question whether taxpayers should fund personal degrees that lack clear social or economic return." 
+    },
+    { 
+        q: "6. Why do critics argue that blanket tuition subsidies can disproportionately benefit the wealthy?", 
+        choices: [
+            "A) Wealthy students are the only ones allowed into public libraries", 
+            "B) Low-income families pay significantly higher income taxes than the rich", 
+            "C) Wealthy parents are banned from paying private tuition", 
+            "D) High-income families already attend college at high rates, so tax subsidies largely flow to them"
+        ], 
+        ans: "D) High-income families already attend college at high rates, so tax subsidies largely flow to them", 
+        explanation: "Universal subsidies often provide windfall financial benefits to affluent students who could already afford tuition." 
+    },
+    { 
+        q: "7. What alternative to universal university funding do many economists recommend for meeting labor demands?", 
+        choices: [
+            "A) Investing public funds in vocational training and technical apprenticeships", 
+            "B) Mandating everyone to stay in school until age 30", 
+            "C) Closing down all specialized trade institutes", 
+            "D) Replacing human workers with artificial intelligence immediately"
+        ], 
+        ans: "A) Investing public funds in vocational training and technical apprenticeships", 
+        explanation: "Targeting funds toward vocational and technical education directly addresses skilled labor shortages." 
+    },
+    { 
+        q: "8. How does heavy student debt affect young people's major life milestones after graduation?", 
+        choices: [
+            "A) It allows them to retire at an earlier age", 
+            "B) It prevents them from buying homes and starting families early in their careers", 
+            "C) It forces them to move to foreign countries permanently", 
+            "D) It increases their disposable income during their 20s"
+        ], 
+        ans: "B) It prevents them from buying homes and starting families early in their careers", 
+        explanation: "Student debt burdens graduates, delaying household formation, marriage, and homeownership." 
+    },
+    { 
+        q: "9. Concerning student 'Responsibility', what potential risk is associated with completely free tuition?", 
+        choices: [
+            "A) Students will be forced to study 20 hours every day", 
+            "B) All students will automatically pursue medical degrees", 
+            "C) Universities will forbid students from choosing their majors", 
+            "D) Without financial commitment, students may lack motivation, leading to higher dropout rates"
+        ], 
+        ans: "D) Without financial commitment, students may lack motivation, leading to higher dropout rates", 
+        explanation: "When students bear zero financial stake, there is a risk of reduced academic seriousness and higher attrition." 
+    },
+    { 
+        q: "10. What macro-economic trade-off do governments face when financing free higher education?", 
+        choices: [
+            "A) It completely eliminates government debt overnight", 
+            "B) It automatically guarantees zero inflation across the entire economy", 
+            "C) It places excessive fiscal strain on public finances at the expense of other essential public services", 
+            "D) It stops all technological innovation in private industries"
+        ], 
+        ans: "C) It places excessive fiscal strain on public finances at the expense of other essential public services", 
+        explanation: "Public funds allocated to free college may reduce budgets for healthcare, social welfare, or primary education." 
+    }
+];
+
+// ポイント（Equal opportunity / Quality / Taxes / Responsibility）に直結した20フレーズ
+const vocabDataRaw = [
+    { en: "climb the socioeconomic ladder", jp: "[Equal opportunity] 社会経済的階層を上る" },
+    { en: "equalize opportunities for all", jp: "[Equal opportunity] すべての人に機会を均等にする" },
+    { en: "alleviate the burden of student debt", jp: "[Equal opportunity] 学生ローンの重荷を軽減する" },
+    { en: "break the cycle of poverty", jp: "[Equal opportunity] 貧困の連鎖を断ち切る" },
+    { en: "remove financial barriers to higher education", jp: "[Equal opportunity] 高等教育への経済的障壁を取り除く" },
+    { en: "degree inflation and credentialism", jp: "[Quality] 学歴インフレと学歴偏重" },
+    { en: "diminish the value of a degree", jp: "[Quality] 学位の希少価値を低下させる" },
+    { en: "the next high school diploma", jp: "[Quality] （大学学位が）次の高校卒業証書［最低要件］" },
+    { en: "misalignment with job market demands", jp: "[Quality] 労働市場の需要とのミスマッチ" },
+    { en: "maintain high academic standards", jp: "[Quality] 高い学術水準を維持する" },
+    { en: "place a heavy burden on taxpayers", jp: "[Taxes] 納税者に重い負担を課す" },
+    { en: "strain government budgets", jp: "[Taxes] 政府の財政・予算を圧迫する" },
+    { en: "disproportionately benefit the wealthy", jp: "[Taxes] 富裕層に不釣り合いな恩恵をもたらす" },
+    { en: "targeted financial aid instead of blanket subsidies", jp: "[Taxes] 一律の補助金ではなく対象を絞った経済的支援" },
+    { en: "allocate public funds to vocational training", jp: "[Taxes] 公費を職業訓練や技能教育に配分する" },
+    { en: "weaken students' motivation to study diligently", jp: "[Responsibility] 熱心に勉強しようとする学生の学習意欲を損なう" },
+    { en: "lead to an increase in dropout rates", jp: "[Responsibility] 大学の中退率の増加につながる" },
+    { en: "foster personal accountability for learning", jp: "[Responsibility] 学びに対する個人の主体的な責任感を養う" },
+    { en: "invest in personal human capital", jp: "[Responsibility] 個人としての人的資本に投資する" },
+    { en: "delayed milestones like starting families", jp: "[Responsibility] 家族を持つ（結婚・出産）などのライフイベントの遅れ" }
+];
+
+// ポイントと連動した英検準1級レベルの10センテンス
+const sentenceData = [
+    { 
+        ja: "【Equal opportunity】無償の授業料は、有能な学生が家庭環境に関わらず社会経済的階層を上ることを可能にします。", 
+        en: "Free tuition allows talented students to climb the socioeconomic ladder regardless of their background.", 
+        hint: "allow A to do / climb the socioeconomic ladder / regardless of ~" 
+    },
+    { 
+        ja: "【Quality】より多くの人々が入学するにつれて、大学の学位は『次の高校卒業証書』になってしまうでしょう。", 
+        en: "As more people enroll, a college degree will become the next high school diploma.", 
+        hint: "接続詞 As / enroll (入学する) / become the next high school diploma" 
+    },
+    { 
+        ja: "【Quality】学歴インフレは、実際の職務能力を大幅に改善することなく、学生を単により長く学校に留まらせるだけです。", 
+        en: "Degree inflation merely forces students to stay in school longer without significantly improving job performance.", 
+        hint: "merely forces A to do / without -ing / job performance" 
+    },
+    { 
+        ja: "【Equal opportunity】高等教育への投資は、国際競争力を高める高度なスキルを持つ労働力を創出します。", 
+        en: "Investing in higher education creates a highly skilled workforce that enhances international competitiveness.", 
+        hint: "動名詞主語 Investing in ~ / 関係代名詞 that enhances ~" 
+    },
+    { 
+        ja: "【Taxes】納税者は、社会全体に恩恵をもたらさない学位に対して資金を提供するよう強いられるべきではありません。", 
+        en: "Taxpayers should not be forced to fund degrees that do not benefit society as a whole.", 
+        hint: "be forced to fund ~ / that do not benefit / society as a whole" 
+    },
+    { 
+        ja: "【Responsibility】大学の完全無償化は、若者がキャリアの初期に家庭を持つことを妨げる経済的負担を軽減します。", 
+        en: "Free higher education alleviates the financial burden that often prevents young people from starting families early in their careers.", 
+        hint: "alleviate the financial burden / prevent A from -ing" 
+    },
+    { 
+        ja: "【Taxes】一律の補助金は、すでに授業料を支払う余裕がある人々を主に助けることによって、社会的格差を悪化させる可能性があります。", 
+        en: "Blanket subsidies can worsen social inequality by primarily helping those who can already afford tuition.", 
+        hint: "Blanket subsidies (一律の補助金) / by helping those who ~ / afford tuition" 
+    },
+    { 
+        ja: "【Quality】教養水準の高い国民はイノベーションを牽引し、複数の産業にわたって長期的な生産性を押し上げます。", 
+        en: "A well-educated population drives innovation and boosts long-term productivity across multiple industries.", 
+        hint: "well-educated population / drives innovation / across multiple industries" 
+    },
+    { 
+        ja: "【Taxes】公的資金は、労働市場の需要に直接合致する職業訓練プログラムにより有効に費やされるべきです。", 
+        en: "Funds would be better spent on vocational training programs that directly match labor market demands.", 
+        hint: "would be better spent on ~ / vocational training / labor market demands" 
+    },
+    { 
+        ja: "【Taxes / Quality】大学教育の無償化を提供することは、他の不可欠な公共サービスを犠牲にして国家財政に過度の負担をかける可能性があります。", 
+        en: "Providing free college education could place an excessive strain on public finances at the expense of other essential services.", 
+        hint: "place an excessive strain on ~ / at the expense of ~ (〜を犠牲にして)" 
+    }
+];
+
+let currentMode = 'video';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedOption = "";
+let vocabData = [];
+
+/* --- 音声読み上げ設定（速度0.8・自然な音声選択） --- */
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const usVoices = voices.filter(v => v.lang === "en-US" || v.lang === "en_US" || v.lang.startsWith("en"));
+    
+    preferredVoice = 
+        usVoices.find(v => v.name.includes("Natural")) ||
+        usVoices.find(v => v.name.includes("Online")) ||
+        usVoices.find(v => v.name.includes("Samantha")) ||
+        usVoices.find(v => v.name.includes("Jenny")) ||
+        usVoices.find(v => v.name.includes("Aria")) ||
+        usVoices.find(v => v.name.includes("Ava")) ||
+        usVoices.find(v => v.name.includes("Google US English")) ||
+        usVoices[0] || 
+        voices[0];
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    if (!preferredVoice) loadVoices();
+
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) uttr.voice = preferredVoice;
+    uttr.lang = 'en-US';
+    uttr.rate = 0.8;
+    uttr.pitch = 1.0;
+
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.style.display = "inline-block";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    const qBox = document.getElementById('questionText');
+    area.innerHTML = "";
+    hintBox.style.display = "none";
+
+    if (currentMode === 'video') {
+        qBox.textContent = "Part 1: Watch the Video";
+        btn.style.display = "none";
+        area.innerHTML = `
+            <div class="video-card">
+                <h2>Should Higher Education Be Free?</h2>
+                <p>動画を視聴し、大学無償化に関する賛成意見（社会的流動性・機会均等）と慎重意見（学歴インフレ・税負担・教育の質）を確認しましょう！</p>
+                <a href="https://youtu.be/lu_7ZyfuIoc?si=z2XuVuNVkwRt2z7O" target="_blank" class="video-link-btn">▶ YouTubeで動画を再生する</a>
+            </div>
+        `;
+    } else if (currentMode === 'comprehension') {
+        const item = videoQuestions[currentIdx];
+        qBox.textContent = item.q;
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        item.choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.jp}`;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'reorder') {
+        const item = sentenceData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.ja}`;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                const wordObj = {text: w, btnId: b.id};
+                userSentence.push(wordObj);
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOM = [...area.querySelectorAll('.answer-word')];
+            const newList = [];
+            currentDOM.forEach(el => {
+                const found = userSentence.find(item => item.text === el.textContent);
+                if(found) newList.push(found);
+            });
+            userSentence = newList;
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+            if(userSentence.length === 0) document.getElementById('mainActionBtn').disabled = true;
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let isCorrect = false;
+        let correctText = "";
+
+        if (currentMode === 'comprehension') {
+            const item = videoQuestions[currentIdx];
+            correctText = item.ans;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'vocab') {
+            correctText = vocabData[currentIdx].en;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'reorder') {
+            correctText = sentenceData[currentIdx].en;
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            if (currentMode === 'vocab' || currentMode === 'reorder') speak(correctText);
+            
+            if (currentMode === 'comprehension') {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">Correct! ${videoQuestions[currentIdx].explanation}</div>`;
+            } else {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            }
+            
+            resultMsg.innerHTML = "Excellent! Perfect understanding! 🚀";
+            resultMsg.style.color = "var(--correct-green)";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Try again! Check your answer. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Correct: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        let max = 0;
+        if (currentMode === 'comprehension') max = videoQuestions.length;
+        else if (currentMode === 'vocab') max = vocabData.length;
+        else if (currentMode === 'reorder') max = sentenceData.length;
+
+        if (currentIdx < max) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-ui').innerHTML = `<h2>Great Job!</h2><p>You have completed this part of the Free Higher Education writing exercise!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-video-content').innerHTML = videoQuestions.map((q, i) => `
+        <div class="video-q-box">
+            <div class="video-q-text">${q.q}</div>
+            <div class="video-q-options">${q.choices.join("<br>")}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => {
+        let cleanJp = d.jp.replace(/^\[.*?\]\s*/, '');
+        return `<div class="vocab-row"><span class="vocab-jp">${i+1}. ${cleanJp}</span><div class="vocab-line"></div></div>`;
+    }).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;
+    }).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
