@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing: Tourism Management & Overtourism (Video-Based)</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+    
+    .topic-card {
+        background: white; padding: 20px; border-radius: 15px; border-left: 6px solid var(--accent-teal);
+        margin-bottom: 20px; text-align: left; width: 100%; max-width: 860px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .topic-label { font-weight: bold; color: var(--accent-teal); font-size: 0.8rem; text-transform: uppercase; }
+    .topic-text { font-size: 1.1rem; font-weight: bold; margin: 5px 0; color: var(--primary-blue); }
+    .points-text { font-size: 0.9rem; color: #d32f2f; font-weight: bold; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-gray);
+        flex-wrap: wrap;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;
+    }
+
+    .question-box {
+        font-size: 1.1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 25px; border-radius: 15px; margin-bottom: 15px; font-weight: bold; min-height: 50px; text-align: left;
+    }
+
+    .grammar-hint {
+        font-size: 0.85rem; color: var(--accent-teal); margin-bottom: 20px; font-weight: bold;
+        background: #e0f2f1; padding: 6px 16px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: 0.2s;
+        text-align: left;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 15px; border-top: 1px solid #eee; }
+    .word-btn { text-align: center; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 90px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #1a237e; border: 2px solid var(--primary-blue);
+        padding: 10px 18px; border-radius: 12px; cursor: grab; font-size: 1rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.4; border-style: dotted; }
+
+    .final-sentence {
+        font-size: 1.25rem; color: var(--primary-blue); font-weight: bold; padding: 25px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 16px 50px;
+        border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    .video-card {
+        background: #f0f4f8; padding: 30px; border-radius: 20px; border: 2px solid var(--border-gray);
+        text-align: center; margin-bottom: 20px;
+    }
+    .video-link-btn {
+        display: inline-block; background: #c62828; color: white; text-decoration: none;
+        padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(198,40,40,0.3); transition: 0.3s;
+    }
+    .video-link-btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { display: block !important; width: 100%; color: black; background: white; }
+        .print-page { page-break-after: always; padding: 10px; }
+        .print-title { font-size: 1.2rem; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
+        .print-q { margin-bottom: 15px; }
+        .vocab-row { display: flex; align-items: flex-end; margin-bottom: 10px; }
+        .vocab-jp { width: 55%; font-size: 0.95rem; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 35px; }
+        .sentence-ja { font-size: 0.9rem; font-weight: bold; }
+        .sentence-choices { font-size: 0.8rem; color: #444; font-style: italic; margin: 5px 0; }
+        .sentence-line { border-bottom: 1px solid #000; height: 35px; }
+        .video-q-box { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .video-q-text { font-weight: bold; font-size: 0.95rem; }
+        .video-q-options { font-size: 0.85rem; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Eiken Pre-1 Writing & Speaking Exercise</h1>
+    <div class="sub-title">Tourism Management & Alternative Measures (Video-Based)</div>
+
+    <div class="topic-card">
+        <div class="topic-label">Writing & Interview Topic</div>
+        <div class="topic-text">Should popular tourist destinations limit the number of visitors?</div>
+        <div class="points-text">Focus: Tourism Management / Alternative Measures / Dispersing Tourists / Sustainable Economy</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch"><input type="checkbox" id="audioToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-video" onclick="switchMode('video')">Part 1: Video</button>
+            <button class="tab-btn" id="tab-comprehension" onclick="switchMode('comprehension')">Part 2: Video Quiz (10)</button>
+            <button class="tab-btn" id="tab-vocab" onclick="switchMode('vocab')">Part 3: Vocab (20)</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Part 4: Sentences (10)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する (A4)</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Part 2: Video Comprehension Questions</div>
+        <div id="print-video-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 3: Academic Vocabulary for Pre-1 Writing & Speaking</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 4: Pre-1 Writing & Speaking Sentence Structures</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const videoQuestions = [
+    { q: "1. What is the main theme of the video regarding popular tourist destinations?", choices: ["A) Why international travel should be completely banned", "B) Why 'overtourism' is often a problem of poor tourism management", "C) How airlines are lowering ticket prices", "D) Why hotels should stop accepting foreign guests"], ans: "B) Why 'overtourism' is often a problem of poor tourism management", explanation: "The video argues that overtourism is largely a management issue rather than just having too many travelers." },
+    { q: "2. Why do massive crowds tend to gather in the exact same famous spots?", choices: ["A) Because other places have no transportation", "B) Because marketing and social media focus heavily on a few iconic landmarks", "C) Because governments force tourists to stay in one area", "D) Because hotels are only built in city centers"], ans: "B) Because marketing and social media focus heavily on a few iconic landmarks", explanation: "Promotion and social media concentrate visitors into a handful of famous sites." },
+    { q: "3. What is a major drawback of simply banning tourists or setting strict visitor caps?", choices: ["A) It immediately solves all environmental issues", "B) It hurts local businesses that rely on tourism revenue and disappoints travelers", "C) It makes flights much cheaper", "D) It increases traffic congestion"], ans: "B) It hurts local businesses that rely on tourism revenue and disappoints travelers", explanation: "Strict caps can damage the local economy and create negative experiences for visitors." },
+    { q: "4. How can cities reduce overcrowding without hurting their overall tourism economy?", choices: ["A) By closing all museums and parks", "B) By promoting lesser-known destinations and dispersing tourists", "C) By doubling hotel taxes for everyone", "D) By shortening airport runways"], ans: "B) By promoting lesser-known destinations and dispersing tourists", explanation: "Spreading visitors across wider regions and off-peak seasons maintains economic benefits." },
+    { q: "5. What role does 'off-peak travel' (visiting outside busy seasons) play in tourism management?", choices: ["A) It makes famous sites even more crowded", "B) It balances visitor flow throughout the year and reduces seasonal strain", "C) It eliminates the need for local tour guides", "D) It forces restaurants to close in winter"], ans: "B) It balances visitor flow throughout the year and reduces seasonal strain", explanation: "Encouraging off-season visits prevents extreme bottlenecks during peak months." },
+    { q: "6. How can digital technology and smart management improve the visitor experience?", choices: ["A) By using timed-entry reservations and real-time crowd data to guide tourists", "B) By blocking internet access in tourist zones", "C) By replacing all local shops with vending machines", "D) By cancelling public bus routes"], ans: "A) By using timed-entry reservations and real-time crowd data to guide tourists", explanation: "Smart tools help manage visitor flow smoothly without turning people away." },
+    { q: "7. Why do local residents often become frustrated with overtourism?", choices: ["A) Because tourists never spend any money", "B) Because infrastructure, housing, and daily life are overwhelmed in concentrated areas", "C) Because there are too many parks", "D) Because local taxes are completely abolished"], ans: "B) Because infrastructure, housing, and daily life are overwhelmed in concentrated areas", explanation: "Poorly managed crowds strain public transit, housing, and neighborhood peace." },
+    { q: "8. What is the benefit of encouraging tourists to stay longer and explore deeper?", choices: ["A) It increases local economic value while reducing rapid day-tripper congestion", "B) It prevents tourists from visiting local restaurants", "C) It increases carbon emissions from short flights", "D) It forces cities to build more highways"], ans: "A) It increases local economic value while reducing rapid day-tripper congestion", explanation: "Quality, slower tourism supports local businesses more sustainably than mass day-trips." },
+    { q: "9. Instead of viewing tourists as a problem to block, how should destinations approach them?", choices: ["A) As a resource to be strategically managed for mutual benefit", "B) As a threat that requires military control", "C) As guests who should never leave their hotels", "D) As people who should pay triple for public water"], ans: "A) As a resource to be strategically managed for mutual benefit", explanation: "Effective tourism management aligns visitor satisfaction with community well-being." },
+    { q: "10. Which statement best summarizes the video's solution to overtourism?", choices: ["A) Strict limits are the only way to save popular cities", "B) Better tourism management and alternative measures are more effective than simple caps", "C) Tourism should be stopped for ten years", "D) Only wealthy citizens should be allowed to travel"], ans: "B) Better tourism management and alternative measures are more effective than simple caps", explanation: "Smart management—such as dispersing crowds and promoting hidden gems—solves overtourism sustainably." }
+];
+
+const vocabDataRaw = [
+    { en: "effective tourism management", jp: "[Management] 効果的な観光マネジメント" },
+    { en: "poor crowd management", jp: "[Management] お粗末な混雑管理" },
+    { en: "alleviate overcrowding", jp: "[Management] 過密状態（混雑）を緩和する" },
+    { en: "regulate visitor flow", jp: "[Management] 訪問者の流れを調整・管理する" },
+    { en: "timed-entry reservation system", jp: "[Management] 時間指定予約システム" },
+    { en: "implement alternative measures", jp: "[Alternatives] 代替策（別の対策）を実施する" },
+    { en: "disperse tourists across regions", jp: "[Alternatives] 観光客を各地域に分散させる" },
+    { en: "promote lesser-known destinations", jp: "[Alternatives] あまり知られていない観光地を宣伝する" },
+    { en: "encourage off-peak travel", jp: "[Alternatives] オフピーク（閑散期）の旅行を奨励する" },
+    { en: "redirect marketing efforts", jp: "[Alternatives] マーケティングの取り組みの方向を変える" },
+    { en: "sustain economic benefits", jp: "[Economy] 経済的利益を維持する" },
+    { en: "avoid hurting local businesses", jp: "[Economy] 地元企業に打撃を与えるのを避ける" },
+    { en: "distribute tourism revenue", jp: "[Economy] 観光収入を（広く）分配する" },
+    { en: "stimulate regional economies", jp: "[Economy] 地方経済を活性化する" },
+    { en: "maximize economic value", jp: "[Economy] 経済的価値を最大化する" },
+    { en: "enhance visitor satisfaction", jp: "[Experience] 訪問者の満足度を高める" },
+    { en: "ensure a positive travel experience", jp: "[Experience] 良い旅行体験を確実にする" },
+    { en: "without deterring travelers", jp: "[Experience] 旅行者を遠ざける（嫌な思いをさせる）ことなく" },
+    { en: "coexist harmoniously with residents", jp: "[Experience] 住民と調和して共存する" },
+    { en: "long-term sustainability", jp: "[Experience] 長期的な持続可能性" }
+];
+
+const sentenceData = [
+    { ja: "【Management】人気観光地におけるオーバーツーリズムは、訪問者が多すぎることよりも、むしろ観光マネジメントの不備によって引き起こされています。", en: "Overtourism in popular destinations is caused by poor tourism management rather than too many visitors.", hint: "be caused by ~ / rather than ~ (〜というよりむしろ)" },
+    { ja: "【Management】厳格な入場制限を設ける代わりに、自治体はより効果的な混雑管理を導入すべきです。", en: "Instead of imposing strict entry limits, local governments should introduce more effective crowd management.", hint: "Instead of ~ing / impose strict entry limits" },
+    { ja: "【Alternatives】訪問者数を制限するよりも、別の対策を実施する方がはるかに効果的です。", en: "Implementing alternative measures is far more effective than simply limiting the number of visitors.", hint: "動名詞主語 / far + 比較級 + than ~" },
+    { ja: "【Alternatives】あまり知られていない観光地を宣伝することで、自治体は観光客をさまざまな地域に分散させることができます。", en: "By promoting lesser-known destinations, authorities can disperse tourists across different regions.", hint: "By ~ing (〜することによって) / disperse A across B" },
+    { ja: "【Alternatives】オフピークの旅行を奨励することは、特定の時期に人気スポットへ観光客が集中するのを防ぎます。", en: "Encouraging off-peak travel prevents tourists from concentrating in popular spots during specific seasons.", hint: "prevent A from ~ing (Aが〜するのを防ぐ)" },
+    { ja: "【Economy】観光客を地方に分散させることは、地域経済を活性化しながら経済的利益を維持するのに役立ちます。", en: "Spreading tourists to rural areas helps sustain economic benefits while stimulating regional economies.", hint: "help + 動詞の原形 / while ~ing" },
+    { ja: "【Economy】訪問者数を制限することは、観光収入に大きく依存している地元企業に深刻な打撃を与えかねません。", en: "Capping visitor numbers could severely harm local businesses that depend heavily on tourism revenue.", hint: "関係代名詞 that / depend heavily on ~" },
+    { ja: "【Experience】時間指定予約システムを導入すれば、旅行者を遠ざけることなく訪問者の満足度を高めることができます。", en: "Introducing a timed-entry reservation system can enhance visitor satisfaction without deterring travelers.", hint: "without ~ing (〜することなく)" },
+    { ja: "【Experience】適切な観光マネジメントは、観光客が質の高い体験を楽しみつつ、住民と調和して共存することを可能にします。", en: "Proper tourism management allows tourists to enjoy quality experiences while coexisting harmoniously with residents.", hint: "allow A to do / coexist with ~ (〜と共存する)" },
+    { ja: "【Conclusion】結論として、単純な人数制限ではなく、戦略的なマネジメントと代替策こそが持続可能な観光の鍵です。", en: "In conclusion, strategic management and alternative measures, rather than simple caps, are the key to sustainable tourism.", hint: "rather than ~ / the key to ~ (〜への鍵)" }
+];
+
+let currentMode = 'video';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedOption = "";
+let vocabData = [];
+
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const usVoices = voices.filter(v => v.lang === "en-US" || v.lang === "en_US" || v.lang.startsWith("en"));
+    
+    preferredVoice = 
+        usVoices.find(v => v.name.includes("Natural")) ||
+        usVoices.find(v => v.name.includes("Online")) ||
+        usVoices.find(v => v.name.includes("Samantha")) ||
+        usVoices.find(v => v.name.includes("Jenny")) ||
+        usVoices.find(v => v.name.includes("Aria")) ||
+        usVoices.find(v => v.name.includes("Ava")) ||
+        usVoices.find(v => v.name.includes("Google US English")) ||
+        usVoices[0] || 
+        voices[0];
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    if (!preferredVoice) loadVoices();
+
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) uttr.voice = preferredVoice;
+    uttr.lang = 'en-US';
+    uttr.rate = 0.8;
+    uttr.pitch = 1.0;
+
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.style.display = "inline-block";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    const qBox = document.getElementById('questionText');
+    area.innerHTML = "";
+    hintBox.style.display = "none";
+
+    if (currentMode === 'video') {
+        qBox.textContent = "Part 1: Watch the Video";
+        btn.style.display = "none";
+        area.innerHTML = `
+            <div class="video-card">
+                <h2>Overtourism & Tourism Management</h2>
+                <p>YouTube動画を視聴して、「なぜ人気観光地に人が殺到するのか」「人数制限以外の解決策（マネジメント・分散化）とは何か」を確認しましょう！</p>
+                <a href="https://www.youtube.com/watch?v=Zu1JvKzZCcc" target="_blank" class="video-link-btn">▶ YouTubeで動画を再生する</a>
+            </div>
+        `;
+    } else if (currentMode === 'comprehension') {
+        const item = videoQuestions[currentIdx];
+        qBox.textContent = item.q;
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        item.choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.jp}`;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'reorder') {
+        const item = sentenceData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.ja}`;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                const wordObj = {text: w, btnId: b.id};
+                userSentence.push(wordObj);
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOM = [...area.querySelectorAll('.answer-word')];
+            const newList = [];
+            currentDOM.forEach(el => {
+                const found = userSentence.find(item => item.text === el.textContent);
+                if(found) newList.push(found);
+            });
+            userSentence = newList;
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+            if(userSentence.length === 0) document.getElementById('mainActionBtn').disabled = true;
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let isCorrect = false;
+        let correctText = "";
+
+        if (currentMode === 'comprehension') {
+            const item = videoQuestions[currentIdx];
+            correctText = item.ans;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'vocab') {
+            correctText = vocabData[currentIdx].en;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'reorder') {
+            correctText = sentenceData[currentIdx].en;
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            if (currentMode === 'vocab' || currentMode === 'reorder') speak(correctText);
+            
+            if (currentMode === 'comprehension') {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">Correct! ${videoQuestions[currentIdx].explanation}</div>`;
+            } else {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            }
+            
+            resultMsg.innerHTML = "Excellent! Perfect understanding! 🚀";
+            resultMsg.style.color = "var(--correct-green)";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Try again! Check your answer. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Correct: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        let max = 0;
+        if (currentMode === 'comprehension') max = videoQuestions.length;
+        else if (currentMode === 'vocab') max = vocabData.length;
+        else if (currentMode === 'reorder') max = sentenceData.length;
+
+        if (currentIdx < max) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-ui').innerHTML = `<h2>Great Job!</h2><p>You have completed this part of the Tourism Management writing & speaking exercise!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-video-content').innerHTML = videoQuestions.map((q, i) => `
+        <div class="video-q-box">
+            <div class="video-q-text">${q.q}</div>
+            <div class="video-q-options">${q.choices.join("<br>")}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => {
+        let cleanJp = d.jp.replace(/^\[.*?\]\s*/, '');
+        return `<div class="vocab-row"><span class="vocab-jp">${i+1}. ${cleanJp}</span><div class="vocab-line"></div></div>`;
+    }).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
