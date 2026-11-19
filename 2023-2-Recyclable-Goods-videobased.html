@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-1 Writing: Recyclable Goods & Corporate Responsibility (Video-Based)</title>
+<style>
+    :root {
+        --primary-blue: #1a237e; 
+        --soft-blue: #e8eaf6;
+        --silver-gray: #f5f5f7;
+        --border-gray: #cfd8dc;
+        --accent-teal: #00897b;
+        --correct-green: #2e7d32;
+        --wrong-red: #c62828;
+        --text-dark: #1a1a1a;
+        --base-font: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro", "Yu Gothic", "Meiryo", sans-serif;
+    }
+
+    body {
+        font-family: var(--base-font);
+        background-color: var(--silver-gray);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin-bottom: 5px; color: var(--primary-blue); }
+    .sub-title { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: normal; }
+    
+    .topic-card {
+        background: white; padding: 20px; border-radius: 15px; border-left: 6px solid var(--accent-teal);
+        margin-bottom: 20px; text-align: left; width: 100%; max-width: 860px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .topic-label { font-weight: bold; color: var(--accent-teal); font-size: 0.8rem; text-transform: uppercase; }
+    .topic-text { font-size: 1.1rem; font-weight: bold; margin: 5px 0; color: var(--primary-blue); }
+    .points-text { font-size: 0.9rem; color: #d32f2f; font-weight: bold; }
+
+    .control-panel {
+        display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-gray);
+        flex-wrap: wrap;
+    }
+
+    .settings { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-blue); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary-blue);
+        background: white; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--primary-blue); color: white; }
+
+    .container {
+        background: white; max-width: 900px; width: 100%; padding: 30px; border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;
+    }
+
+    .question-box {
+        font-size: 1.1rem; background-color: var(--soft-blue); border-bottom: 4px solid var(--primary-blue);
+        padding: 25px; border-radius: 15px; margin-bottom: 15px; font-weight: bold; min-height: 50px; text-align: left;
+    }
+
+    .grammar-hint {
+        font-size: 0.85rem; color: var(--accent-teal); margin-bottom: 20px; font-weight: bold;
+        background: #e0f2f1; padding: 6px 16px; border-radius: 10px; display: inline-block;
+    }
+
+    .choices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 750px; margin: 0 auto; }
+    .choice-btn, .word-btn {
+        background-color: var(--soft-blue); color: #000; border: 1px solid var(--border-gray);
+        padding: 12px 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-family: var(--base-font); font-weight: bold; transition: 0.2s;
+        text-align: left;
+    }
+    .choice-btn:hover { background-color: #c5cae9; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 15px; border-top: 1px solid #eee; }
+    .word-btn { text-align: center; }
+    .word-btn.used { visibility: hidden; pointer-events: none; }
+
+    .answer-area {
+        min-height: 90px; border: 2px dashed var(--border-gray); border-radius: 15px; padding: 15px;
+        margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa;
+    }
+
+    .answer-word {
+        background-color: white; color: #1a237e; border: 2px solid var(--primary-blue);
+        padding: 10px 18px; border-radius: 12px; cursor: grab; font-size: 1rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .answer-word:active { cursor: grabbing; }
+    .answer-word.dragging { opacity: 0.4; border-style: dotted; }
+
+    .final-sentence {
+        font-size: 1.25rem; color: var(--primary-blue); font-weight: bold; padding: 25px;
+        line-height: 1.6; text-align: left; background: #f5f5f7; border-radius: 15px;
+    }
+
+    .action-btn {
+        background: var(--primary-blue); color: white; border: none; padding: 16px 50px;
+        border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+    }
+    .action-btn:disabled { background: #ccc; }
+
+    .video-card {
+        background: #f0f4f8; padding: 30px; border-radius: 20px; border: 2px solid var(--border-gray);
+        text-align: center; margin-bottom: 20px;
+    }
+    .video-link-btn {
+        display: inline-block; background: #c62828; color: white; text-decoration: none;
+        padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(198,40,40,0.3); transition: 0.3s;
+    }
+    .video-link-btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+    #print-area { display: none; }
+
+    @media print {
+        .container, header, .no-print, .action-btn { display: none !important; }
+        #print-area { display: block !important; width: 100%; color: black; background: white; }
+        .print-page { page-break-after: always; padding: 10px; }
+        .print-title { font-size: 1.2rem; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
+        .print-q { margin-bottom: 15px; }
+        .vocab-row { display: flex; align-items: flex-end; margin-bottom: 10px; }
+        .vocab-jp { width: 55%; font-size: 0.95rem; }
+        .vocab-line { flex-grow: 1; border-bottom: 1px solid #000; height: 35px; }
+        .sentence-ja { font-size: 0.9rem; font-weight: bold; }
+        .sentence-choices { font-size: 0.8rem; color: #444; font-style: italic; margin: 5px 0; }
+        .sentence-line { border-bottom: 1px solid #000; height: 35px; }
+        .video-q-box { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .video-q-text { font-weight: bold; font-size: 0.95rem; }
+        .video-q-options { font-size: 0.85rem; margin-top: 5px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+    <h1>Eiken Pre-1 Writing & Speaking Exercise</h1>
+    <div class="sub-title">Recyclable Goods & Corporate Responsibility (Video-Based)</div>
+
+    <div class="topic-card">
+        <div class="topic-label">Writing & Interview Topic</div>
+        <div class="topic-text">Should companies be required to produce goods that are easy to recycle?</div>
+        <div class="points-text">Points: Company profits / Customer demand / Pollution / Product quality</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="settings">
+            <span>Audio</span>
+            <label class="switch"><input type="checkbox" id="audioToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-video" onclick="switchMode('video')">Part 1: Video</button>
+            <button class="tab-btn" id="tab-comprehension" onclick="switchMode('comprehension')">Part 2: Video Quiz (10)</button>
+            <button class="tab-btn" id="tab-vocab" onclick="switchMode('vocab')">Part 3: Vocab (20)</button>
+            <button class="tab-btn" id="tab-reorder" onclick="switchMode('reorder')">Part 4: Sentences (10)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div class="question-box" id="questionText">Loading...</div>
+        <div id="hint-box" class="grammar-hint" style="display:none;"></div>
+        <div id="interactive-area"></div>
+        <div id="resultMsg" style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;"></div>
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()" disabled>Check Answer</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:25px; background:none; border:none; text-decoration:underline; cursor:pointer; color:#777; font-size: 0.8rem;">ワークシートを印刷する (A4)</button>
+</div>
+
+<div id="print-area">
+    <div class="print-page">
+        <div class="print-title">Part 2: Video Comprehension Questions</div>
+        <div id="print-video-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 3: Academic Vocabulary for Pre-1 Writing</div>
+        <div id="print-vocab-content"></div>
+    </div>
+    <div class="print-page">
+        <div class="print-title">Part 4: Pre-1 Writing Sentence Structures</div>
+        <div id="print-sentence-content"></div>
+    </div>
+</div>
+
+<script>
+const videoQuestions = [
+    { 
+        q: "1. What is the central argument of the video regarding recycling and corporations?", 
+        choices: [
+            "A) Individual consumers are solely responsible for ocean plastic due to improper household sorting habits", 
+            "B) Modern recycling facilities can easily reprocess all types of plastic multiple times without quality loss", 
+            "C) Major companies deliberately shifted the burden of waste management onto individual consumers", 
+            "D) Municipal recycling centers generate enormous profits by selling sorted plastic back to manufacturers"
+        ], 
+        ans: "C) Major companies deliberately shifted the burden of waste management onto individual consumers", 
+        explanation: "The video explains how corporate campaigns promoted 'reduce, reuse, recycle' to shift responsibility away from producers." 
+    },
+    { 
+        q: "2. Why do most plastic products fail to get recycled even when consumers sort them properly?", 
+        choices: [
+            "A) Because consumers wash plastic containers with hot water that damages the chemical structure", 
+            "B) Because local governments legally prohibit private facilities from melting down used plastics", 
+            "C) Because most commercial plastics naturally dissolve in rainwater before reaching sorting plants", 
+            "D) Because companies design complex, mixed-material packaging that is costly or impossible to process"
+        ], 
+        ans: "D) Because companies design complex, mixed-material packaging that is costly or impossible to process", 
+        explanation: "Many products use mixed polymers, dyes, or adhesives that make recycling economically and technically unviable." 
+    },
+    { 
+        q: "3. What happened after major campaigns promoted recycling in the late 20th century?", 
+        choices: [
+            "A) Global plastic production dropped dramatically as manufacturers switched to reusable glass containers", 
+            "B) Single-use plastic production continued to surge while landfills and ecosystems overflowed with waste", 
+            "C) Major beverage companies voluntarily eliminated all disposable packaging across international markets", 
+            "D) Public littering was completely eradicated thanks to widespread municipal recycling bin installations"
+        ], 
+        ans: "B) Single-use plastic production continued to surge while landfills and ecosystems overflowed with waste", 
+        explanation: "Promoting recycling allowed companies to keep expanding single-use packaging without redesigning products." 
+    },
+    { 
+        q: "4. What is the main financial obstacle for recycling companies today?", 
+        choices: [
+            "A) There is an acute shortage of discarded plastic waste available for industrial reprocessing plants", 
+            "B) Recycled plastic pellets are significantly heavier and more expensive to transport than metal", 
+            "C) Virgin (newly made) plastic is often far cheaper than collecting and reprocessing recycled plastic", 
+            "D) National governments impose a 90% environmental tax on products made from recycled materials"
+        ], 
+        ans: "C) Virgin (newly made) plastic is often far cheaper than collecting and reprocessing recycled plastic", 
+        explanation: "Low oil and gas prices make new plastic cheaper than collecting, sorting, and reprocessing used waste." 
+    },
+    { 
+        q: "5. What happens to a large portion of waste that cannot be recycled locally?", 
+        choices: [
+            "A) It is chemically converted into high-end luxury clothing and exported to European fashion houses", 
+            "B) It is compressed into construction blocks and used to build affordable housing in major cities", 
+            "C) It is safely neutralized using bacterial enzymes in underground municipal storage facilities", 
+            "D) It ends up in landfills, incinerators, or is exported to developing nations with limited infrastructure"
+        ], 
+        ans: "D) It ends up in landfills, incinerators, or is exported to developing nations with limited infrastructure", 
+        explanation: "Unrecyclable waste causes severe pollution and burdens communities with inadequate waste infrastructure." 
+    },
+    { 
+        q: "6. According to the video, why is individual action at the recycling bin not enough?", 
+        choices: [
+            "A) Because individuals have no control over how commercial products and packaging are designed", 
+            "B) Because standard household recycling bins are too small to hold weekly family packaging waste", 
+            "C) Because sorting household trash by material type is strictly illegal in most metropolitan areas", 
+            "D) Because modern consumers refuse to purchase eco-friendly items even when prices are identical"
+        ], 
+        ans: "A) Because individuals have no control over how products and packaging are designed", 
+        explanation: "Systemic change requires addressing upstream production and corporate design choices." 
+    },
+    { 
+        q: "7. What does 'Extended Producer Responsibility' (corporate accountability) mean in this context?", 
+        choices: [
+            "A) Consumers must pay an additional environmental fine every time they purchase packaged groceries", 
+            "B) Retail supermarkets must close their stores on weekends to reduce commercial waste generation", 
+            "C) Companies should be held accountable for the entire lifecycle and recyclability of their products", 
+            "D) Chemical engineers should stop researching synthetic polymers and return to traditional wood packaging"
+        ], 
+        ans: "C) Companies should be held accountable for the entire lifecycle and recyclability of their products", 
+        explanation: "Requiring companies to design recyclable goods forces them to internalize environmental costs." 
+    },
+    { 
+        q: "8. Why might companies resist strict mandates to produce only easily recyclable goods?", 
+        choices: [
+            "A) Because manufacturers deliberately want to expand the physical size of municipal landfills", 
+            "B) Because products made from recyclable materials cannot be legally advertised on television", 
+            "C) Because consumers strongly dislike minimalist packaging and prefer complex multi-layer wrappers", 
+            "D) Because redesigning supply chains and using alternative materials can raise production costs"
+        ], 
+        ans: "D) Because redesigning supply chains and using alternative materials can raise production costs", 
+        explanation: "Switching materials and retooling factories requires significant upfront investment and may affect product durability." 
+    },
+    { 
+        q: "9. How can standardized, simple product design help solve the waste crisis?", 
+        choices: [
+            "A) By making mechanical sorting and material reprocessing much cheaper and more efficient", 
+            "B) By forcing consumers to store unrecyclable household trash in their own homes indefinitely", 
+            "C) By completely eliminating the legal requirement to print ingredient labels on food packages", 
+            "D) By requiring all competing brands to make their products look identical in shape and color"
+        ], 
+        ans: "A) By making mechanical sorting and material reprocessing much cheaper and more efficient", 
+        explanation: "Using mono-materials and removable labels dramatically increases actual recycling rates." 
+    },
+    { 
+        q: "10. What is the key takeaway for policymakers and society from the video?", 
+        choices: [
+            "A) Municipalities should shut down all recycling programs and incinerate all household waste", 
+            "B) Meaningful environmental progress requires regulating corporate production, not just educating consumers", 
+            "C) Only small independent local shops are responsible for generating non-recyclable plastic pollution", 
+            "D) Technological innovation in material science is unnecessary if consumers simply buy fewer goods"
+        ], 
+        ans: "B) Meaningful environmental progress requires regulating corporate production, not just educating consumers", 
+        explanation: "To mitigate pollution effectively, companies must be required or incentivized to design truly recyclable products." 
+    }
+];
+
+const vocabDataRaw = [
+    { en: "corporate accountability", jp: "[Pollution / Pros] 企業の説明責任・果たすべき責任" },
+    { en: "mitigate environmental pollution", jp: "[Pollution / Pros] 環境汚染を軽減する" },
+    { en: "promote a circular economy", jp: "[Pollution / Pros] 循環型経済を促進する" },
+    { en: "extend landfill lifespans", jp: "[Pollution / Pros] 埋立地の寿命を延ばす" },
+    { en: "curb single-use waste", jp: "[Pollution / Pros] 使い捨て廃棄物を抑制する" },
+    { en: "evolving customer demand", jp: "[Customer Demand / Pros] 変化・高まりつつある顧客の需要" },
+    { en: "align with ethical values", jp: "[Customer Demand / Pros] （消費者の）倫理的価値観と一致する" },
+    { en: "enhance brand credibility", jp: "[Customer Demand / Pros] ブランドの信頼性を高める" },
+    { en: "eco-conscious consumers", jp: "[Customer Demand / Pros] 環境意識の高い消費者" },
+    { en: "meet sustainability expectations", jp: "[Customer Demand / Pros] 持続可能性への期待に応える" },
+    { en: "diminish corporate profits", jp: "[Company Profits / Cons] 企業の利益を減少させる" },
+    { en: "soaring production costs", jp: "[Company Profits / Cons] 急騰する生産コスト" },
+    { en: "pass expenses on to consumers", jp: "[Company Profits / Cons] 費用を消費者に転嫁する" },
+    { en: "impose a financial burden", jp: "[Company Profits / Cons] 金銭的負担を課す" },
+    { en: "weaken global competitiveness", jp: "[Company Profits / Cons] 国際競争力を弱める" },
+    { en: "compromise product quality", jp: "[Product Quality / Cons] 製品の品質を損なう" },
+    { en: "durability of materials", jp: "[Product Quality / Cons] 素材の耐久性" },
+    { en: "limited technical feasibility", jp: "[Product Quality / Cons] 限られた技術的実現可能性" },
+    { en: "stifle industrial innovation", jp: "[Product Quality / Cons] 産業イノベーションを阻害する" },
+    { en: "deterioration in performance", jp: "[Product Quality / Cons] 性能の低下" }
+];
+
+const sentenceData = [
+    { ja: "【Pollution / Pros】企業にリサイクルしやすい製品の生産を義務づけることは、環境汚染を軽減し循環型経済を促進します。", en: "Requiring companies to produce easily recyclable goods mitigates pollution and promotes a circular economy.", hint: "動名詞主語 (Requiring A to do) / mitigate pollution" },
+    { ja: "【Pollution / Pros】企業が製品設計の段階で廃棄物に対処しなければ、埋立地の容量はすぐに限界に達するでしょう。", en: "Unless companies address waste at the design stage, landfill capacity will soon reach its limit.", hint: "接続詞 Unless (〜しない限り) / at the design stage" },
+    { ja: "【Customer Demand / Pros】現代の環境意識の高い消費者は、企業の製品が自らの倫理的価値観と一致することを期待しています。", en: "Modern eco-conscious consumers expect corporate products to align with their ethical values.", hint: "expect A to do / align with ~ (〜と一致する)" },
+    { ja: "【Customer Demand / Pros】持続可能な慣行を採用することは、ブランドイメージを高め、長期的な顧客の信頼を獲得します。", en: "Adopting sustainable practices enhances brand image and earns long-term customer trust.", hint: "動名詞主語 (Adopting...) / enhance brand image" },
+    { ja: "【Company Profits / Cons】厳格なリサイクル基準を義務づけることは生産コストを急騰させ、企業の利益を減少させます。", en: "Mandating strict recycling standards causes production costs to soar and diminishes corporate profits.", hint: "cause A to do / diminish corporate profits" },
+    { ja: "【Company Profits / Cons】企業は増加した製造費用を、より高い小売価格という形で消費者に転嫁する可能性があります。", en: "Companies may pass the increased manufacturing expenses on to consumers in the form of higher retail prices.", hint: "pass A on to B / in the form of ~" },
+    { ja: "【Company Profits / Cons】過度な政府の規制は、中小企業に重い金銭的負担を課し、国際競争力を弱めかねません。", en: "Excessive government regulations could impose a heavy financial burden on small businesses and weaken global competitiveness.", hint: "impose A on B / global competitiveness" },
+    { ja: "【Product Quality / Cons】リサイクル可能な素材のみを使用することは、しばしば製品の品質や耐久性を損ないます。", en: "Using only recyclable materials often compromises the quality and durability of products.", hint: "動名詞主語 / compromise the quality and durability" },
+    { ja: "【Product Quality / Cons】現在の技術では、安全性を犠牲にすることなく全ての製品をリサイクル可能にすることは不可能です。", en: "With current technology, it is impossible to make all goods recyclable without sacrificing safety.", hint: "形式主語 It is ... to ~ / without ~ing" },
+    { ja: "【Conclusion】結論として、政府は企業の利益と環境保全のバランスを取るために、義務化ではなく支援策を導入すべきです。", en: "In conclusion, governments should introduce incentives rather than mandates to balance corporate profits and environmental preservation.", hint: "rather than ~ / balance A and B" }
+];
+
+let currentMode = 'video';
+let currentIdx = 0;
+let userSentence = [];
+let isChecked = false;
+let tries = 3;
+let selectedOption = "";
+let vocabData = [];
+
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const usVoices = voices.filter(v => v.lang === "en-US" || v.lang === "en_US" || v.lang.startsWith("en"));
+    
+    preferredVoice = 
+        usVoices.find(v => v.name.includes("Natural")) ||
+        usVoices.find(v => v.name.includes("Online")) ||
+        usVoices.find(v => v.name.includes("Samantha")) ||
+        usVoices.find(v => v.name.includes("Jenny")) ||
+        usVoices.find(v => v.name.includes("Aria")) ||
+        usVoices.find(v => v.name.includes("Ava")) ||
+        usVoices.find(v => v.name.includes("Google US English")) ||
+        usVoices[0] || 
+        voices[0];
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!document.getElementById('audioToggle').checked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    if (!preferredVoice) loadVoices();
+
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) uttr.voice = preferredVoice;
+    uttr.lang = 'en-US';
+    uttr.rate = 0.8;
+    uttr.pitch = 1.0;
+
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(uttr);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentIdx = 0;
+    if(mode === 'vocab') {
+        vocabData = [...vocabDataRaw];
+        shuffleArray(vocabData);
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    isChecked = false;
+    tries = 3;
+    document.getElementById('resultMsg').textContent = "";
+    const btn = document.getElementById('mainActionBtn');
+    btn.textContent = "Check Answer";
+    btn.style.display = "inline-block";
+    btn.disabled = true;
+
+    const area = document.getElementById('interactive-area');
+    const hintBox = document.getElementById('hint-box');
+    const qBox = document.getElementById('questionText');
+    area.innerHTML = "";
+    hintBox.style.display = "none";
+
+    if (currentMode === 'video') {
+        qBox.textContent = "Part 1: Watch the Video";
+        btn.style.display = "none";
+        area.innerHTML = `
+            <div class="video-card">
+                <h2>How Big Business Broke Recycling (PBS Terra)</h2>
+                <p>動画を視聴して、「なぜ現在多くの製品がリサイクルできないのか」「企業の製品設計の責任とコスト・技術的課題」について理解を深めましょう！</p>
+                <a href="https://www.youtube.com/watch?v=JK1BfPw7lnQ" target="_blank" class="video-link-btn">▶ YouTubeで動画を再生する</a>
+            </div>
+        `;
+    } else if (currentMode === 'comprehension') {
+        const item = videoQuestions[currentIdx];
+        qBox.textContent = item.q;
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        item.choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'vocab') {
+        const item = vocabData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.jp}`;
+        let choices = [item.en];
+        while(choices.length < 4) {
+            let r = vocabDataRaw[Math.floor(Math.random()*vocabDataRaw.length)].en;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        shuffleArray(choices);
+        
+        const grid = document.createElement('div');
+        grid.className = "choices-grid";
+        choices.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "choice-btn";
+            b.textContent = c;
+            b.onclick = () => {
+                if(isChecked) return;
+                selectedOption = c;
+                document.querySelectorAll('.choice-btn').forEach(btnEl => btnEl.style.backgroundColor = "");
+                b.style.backgroundColor = "#c5cae9";
+                btn.disabled = false;
+                speak(c);
+            };
+            grid.appendChild(b);
+        });
+        area.appendChild(grid);
+    } else if (currentMode === 'reorder') {
+        const item = sentenceData[currentIdx];
+        qBox.textContent = `${currentIdx + 1}. ${item.ja}`;
+        hintBox.textContent = `Hint: ${item.hint}`;
+        hintBox.style.display = "inline-block";
+        userSentence = [];
+        
+        const ansArea = document.createElement('div');
+        ansArea.className = "answer-area";
+        ansArea.id = "answerArea";
+        
+        ansArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const afterElement = getDragAfterElement(ansArea, e.clientX);
+            if (afterElement == null) {
+                ansArea.appendChild(draggingElement);
+            } else {
+                ansArea.insertBefore(draggingElement, afterElement);
+            }
+        });
+
+        area.appendChild(ansArea);
+
+        const bank = document.createElement('div');
+        bank.className = "word-bank";
+        let words = item.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        let shuffleWords = [...words];
+        shuffleArray(shuffleWords);
+
+        shuffleWords.forEach((w, idx) => {
+            const b = document.createElement('button');
+            b.className = "word-btn";
+            b.textContent = w;
+            b.id = "word-" + idx;
+            b.onclick = () => {
+                const wordObj = {text: w, btnId: b.id};
+                userSentence.push(wordObj);
+                b.classList.add('used');
+                renderSentence();
+                btn.disabled = false;
+            };
+            bank.appendChild(b);
+        });
+        area.appendChild(bank);
+    }
+}
+
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.answer-word:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function renderSentence() {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = "";
+    userSentence.forEach((obj) => {
+        const s = document.createElement('div');
+        s.className = "answer-word";
+        s.textContent = obj.text;
+        s.draggable = true;
+        s.addEventListener('dragstart', () => s.classList.add('dragging'));
+        s.addEventListener('dragend', () => {
+            s.classList.remove('dragging');
+            const currentDOM = [...area.querySelectorAll('.answer-word')];
+            const newList = [];
+            currentDOM.forEach(el => {
+                const found = userSentence.find(item => item.text === el.textContent);
+                if(found) newList.push(found);
+            });
+            userSentence = newList;
+        });
+        s.onclick = () => {
+            document.getElementById(obj.btnId).classList.remove('used');
+            userSentence = userSentence.filter(item => item !== obj);
+            renderSentence();
+            if(userSentence.length === 0) document.getElementById('mainActionBtn').disabled = true;
+        };
+        area.appendChild(s);
+    });
+}
+
+function handleMainAction() {
+    const btn = document.getElementById('mainActionBtn');
+    const resultMsg = document.getElementById('resultMsg');
+
+    if (!isChecked) {
+        let isCorrect = false;
+        let correctText = "";
+
+        if (currentMode === 'comprehension') {
+            const item = videoQuestions[currentIdx];
+            correctText = item.ans;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'vocab') {
+            correctText = vocabData[currentIdx].en;
+            isCorrect = (selectedOption === correctText);
+        } else if (currentMode === 'reorder') {
+            correctText = sentenceData[currentIdx].en;
+            const currentDOMWords = [...document.querySelectorAll('.answer-word')].map(el => el.textContent);
+            let userStr = currentDOMWords.join(" ").replace(/\s+([.,])/g, "$1");
+            isCorrect = (userStr === correctText);
+        }
+
+        if (isCorrect) {
+            isChecked = true;
+            if (currentMode === 'vocab' || currentMode === 'reorder') speak(correctText);
+            
+            if (currentMode === 'comprehension') {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">Correct! ${videoQuestions[currentIdx].explanation}</div>`;
+            } else {
+                document.getElementById('interactive-area').innerHTML = `<div class="final-sentence">${correctText}</div>`;
+            }
+            
+            resultMsg.innerHTML = "Excellent! Perfect understanding! 🚀";
+            resultMsg.style.color = "var(--correct-green)";
+            btn.textContent = "Next →";
+        } else {
+            tries--;
+            if (tries > 0) {
+                resultMsg.innerHTML = `Try again! Check your answer. (${tries} left)`;
+                resultMsg.style.color = "var(--wrong-red)";
+            } else {
+                isChecked = true;
+                resultMsg.innerHTML = `Correct: ${correctText}`;
+                btn.textContent = "Next →";
+            }
+        }
+    } else {
+        currentIdx++;
+        let max = 0;
+        if (currentMode === 'comprehension') max = videoQuestions.length;
+        else if (currentMode === 'vocab') max = vocabData.length;
+        else if (currentMode === 'reorder') max = sentenceData.length;
+
+        if (currentIdx < max) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-ui').innerHTML = `<h2>Great Job!</h2><p>You have completed this part of the Recyclable Goods writing & speaking exercise!</p>`;
+            btn.style.display = "none";
+        }
+    }
+}
+
+function preparePrint() {
+    document.getElementById('print-video-content').innerHTML = videoQuestions.map((q, i) => `
+        <div class="video-q-box">
+            <div class="video-q-text">${q.q}</div>
+            <div class="video-q-options">${q.choices.join("<br>")}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('print-vocab-content').innerHTML = vocabDataRaw.map((d, i) => {
+        let cleanJp = d.jp.replace(/^\[.*?\]\s*/, '');
+        return `<div class="vocab-row"><span class="vocab-jp">${i+1}. ${cleanJp}</span><div class="vocab-line"></div></div>`;
+    }).join('');
+
+    document.getElementById('print-sentence-content').innerHTML = sentenceData.map((d, i) => {
+        let words = d.en.replace(/([.,])/g, " $1").split(" ").filter(w => w !== "");
+        shuffleArray(words);
+        return `
+            <div class="print-q">
+                <div class="sentence-ja">${i+1}. ${d.ja}</div>
+                <div class="sentence-choices">[ ${words.join(" / ")} ]</div>
+                <div class="sentence-line"></div>
+            </div>`;}).join('');
+}
+
+window.onload = () => {
+    vocabData = [...vocabDataRaw];
+    shuffleArray(vocabData);
+    loadQuestion();
+    preparePrint();
+};
+</script>
+</body>
+</html>
